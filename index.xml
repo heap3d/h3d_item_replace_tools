@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package version="801">
+	<kit name="h3d_item_replace_tools" restart="YES">
+		<source target="h3d_item_replace_tools/scripts/auto_largest.py">scripts/auto_largest.py</source>
+		<source target="h3d_item_replace_tools/scripts/channel_to_setup.py">scripts/channel_to_setup.py</source>
+		<source target="h3d_item_replace_tools/scripts/find matching meshes.py">scripts/find matching meshes.py</source>
+		<source target="h3d_item_replace_tools/scripts/get mesh template stats.py">scripts/get mesh template stats.py</source>
+		<source target="h3d_item_replace_tools/scripts/hierarchy fix.py">scripts/hierarchy fix.py</source>
+		<source target="h3d_item_replace_tools/scripts/mesh islands to items.py">scripts/mesh islands to items.py</source>
+		<source target="h3d_item_replace_tools/scripts/replace selected by instance of specific item.py">scripts/replace selected by instance of specific item.py</source>
+	</kit>
+	<message button="Help">h3d_item_replace_tools Kit installation complete.</message>
+</package>
