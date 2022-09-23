@@ -15,6 +15,8 @@ import modo.mathutils as mm
 
 USER_VAL_NAME_SEARCH_DIST = 'h3d_sumt_search_dist'
 USER_VAL_NAME_TYPE_PCT = 'h3d_sumt_type_pct'
+USER_VAL_NAME_GROUP_SIMILAR = 'h3d_sumt_group_similar'
+USER_VAL_NAME_MERGE_CLOSEST = 'h3d_sumt_merge_closest'
 USER_VAL_NAME_LARGEST_ROT = 'h3d_sumt_largest_rot'
 USER_VAL_NAME_LARGEST_POS = 'h3d_sumt_largest_pos'
 TMP_GRP_NAME_BASE = '$h3d$ unmerge '
@@ -39,7 +41,7 @@ def get_tmp_name(name):
     return TMP_GRP_NAME_BASE + name
 
 
-def modo_unmerge(meshes):
+def modo_unmerge(meshes, group_similar, type_threshold, largest_rot, largest_pos):
     if meshes is None:
         return
     if not meshes:
@@ -49,6 +51,15 @@ def modo_unmerge(meshes):
             continue
         mesh.select(replace=True)
         lx.eval('layer.unmerge {}'.format(mesh.id))
+
+    # group similar items
+    if group_similar:
+        parent_folder = meshes[0].parent
+        todo_meshes = parent_folder.children()
+        # set center
+        for mesh in todo_meshes:
+            set_item_center(mesh=mesh, largest_rot=largest_rot, largest_pos=largest_pos)
+        group_similar_items(todo_meshes, type_threshold)
 
 
 def merge_meshes(mesh1, mesh2):
@@ -175,6 +186,26 @@ def get_bb_size(mesh):
     return mm.Vector3(size_x, size_y, size_z)
 
 
+# def get_min_mid_max_list(v_Vector3):
+#     v_list = list(v_Vector3)
+#     v_list.sort()
+#     return v_list
+
+
+def get_center_ratios(mesh):
+    if not mesh:
+        return mm.Vector3()
+    if not mesh.geometry.polygons:
+        return mm.Vector3()
+    c1, c2 = mesh.geometry.boundingBox
+    size_x, size_y, size_z = get_bb_size(mesh)
+    return mm.Vector3(abs(size_x / c2[0]), abs(size_y / c2[1]), abs(size_z / c2[2]))
+
+
+def diff_ratio(val1, val2):
+    return max(val1, val2) / min(val1, val2) - 1
+
+
 def is_mesh_similar(current_mesh, compare_mesh, threshold):
     if not all((current_mesh, compare_mesh)):
         return False
@@ -183,23 +214,36 @@ def is_mesh_similar(current_mesh, compare_mesh, threshold):
     if not all(mesh.geometry.polygons for mesh in (current_mesh, compare_mesh)):
         return False
     # todo check axis ratio
-    curr_size_v3 = get_bb_size(current_mesh)
-    curr_max = max(curr_size_v3)
-    curr_min = min(curr_size_v3)
-    sizes = list(curr_size_v3)
-    sizes.remove(curr_max)
-    sizes.remove(curr_min)
-    curr_mid = sizes[0]
-    comp_size_v3 = get_bb_size(compare_mesh)
-    comp_max = max(comp_size_v3)
-    comp_min = min(comp_size_v3)
-    sizes = list(comp_size_v3)
-    sizes.remove(comp_max)
-    sizes.remove(comp_min)
-    comp_mid = sizes[0]
-
+    curr_size = get_bb_size(current_mesh)
+    comp_size = get_bb_size(compare_mesh)
+    curr_ratio_xy = curr_size.x / curr_size.y
+    curr_ratio_xz = curr_size.x / curr_size.z
+    comp_ratio_xy = comp_size.x / comp_size.y
+    comp_ratio_xz = comp_size.x / comp_size.z
+    dr_xy = diff_ratio(curr_ratio_xy, comp_ratio_xy)
+    if dr_xy > threshold:
+        print('dr_xy = {:.6f}'.format(dr_xy))
+        return False
+    dr_xz = diff_ratio(curr_ratio_xz, comp_ratio_xz)
+    if dr_xz > threshold:
+        print('dr_xz = {:.6f}'.format(dr_xz))
+        return False
     # todo check center position
-    # todo check center orientation
+    curr_center_ratio = get_center_ratios(current_mesh)
+    comp_center_ratio = get_center_ratios(compare_mesh)
+    # TODO CHECK THIS OUT
+    dr_cx = diff_ratio(curr_center_ratio.x, comp_center_ratio.x)
+    if dr_cx > threshold:
+        print('dr_cx = {:.6f}'.format(dr_cx))
+        return False
+    dr_cy = diff_ratio(curr_center_ratio.y, comp_center_ratio.y)
+    if dr_cy > threshold:
+        print('dr_cy = {:.6f}'.format(dr_cy))
+        return False
+    dr_cz = diff_ratio(curr_center_ratio.z, comp_center_ratio.z)
+    if dr_cz > threshold:
+        print('dr_cz = {:.6f}'.format(dr_cz))
+        return False
     return True
 
 
@@ -211,27 +255,14 @@ def is_mesh_equal(current_mesh, compare_mesh, threshold):
     if not all(mesh.geometry.polygons for mesh in (current_mesh, compare_mesh)):
         return False
     # todo check axis size
-    curr_size_v3 = get_bb_size(current_mesh)
-    curr_max = max(curr_size_v3)
-    curr_min = min(curr_size_v3)
-    sizes = list(curr_size_v3)
-    sizes.remove(curr_max)
-    sizes.remove(curr_min)
-    curr_mid = sizes[0]
-    comp_size_v3 = get_bb_size(compare_mesh)
-    comp_max = max(comp_size_v3)
-    comp_min = min(comp_size_v3)
-    sizes = list(comp_size_v3)
-    sizes.remove(comp_max)
-    sizes.remove(comp_min)
-    comp_mid = sizes[0]
-    if abs(curr_max / comp_max) > threshold:
+    curr_size = get_bb_size(current_mesh)
+    comp_size = get_bb_size(compare_mesh)
+    if diff_ratio(curr_size.x, comp_size.x) > threshold:
         return False
-    if abs(curr_min / comp_min) > threshold:
+    if diff_ratio(curr_size.y, comp_size.y) > threshold:
         return False
-    if abs(curr_mid / comp_mid) > threshold:
+    if diff_ratio(curr_size.z, comp_size.z) > threshold:
         return False
-
     return True
 
 
@@ -246,44 +277,22 @@ def move_item_to_group_loc(item, group_loc_name):
     item.setParent(group_loc)
 
 
-def smart_unmerge(meshes, search_dist, largest_rot, largest_pos, type_detect_dist):
-    if meshes is None:
-        return
-    if not meshes:
-        return
-    # check for any polygons in the meshes
-    if not any(mesh.geometry.polygons for mesh in meshes):
-        return
-    # todo do unmerge in a new scene to speed up the process
-    modo_unmerge(meshes)
-    parent_folder = meshes[0].parent
-    todo_meshes = parent_folder.children()
-    while todo_meshes:
-        current_mesh = todo_meshes.pop(0)
-        current_mesh_modified = False
-        compare_meshes = list(todo_meshes)
-        while compare_meshes:
-            compare_mesh = compare_meshes.pop()
-            if not is_center_near(current_mesh, compare_mesh, search_dist):
-                continue
-            if not is_bounding_box_intersects(current_mesh, compare_mesh, search_dist, largest_rot, largest_pos):
-                continue
-            todo_meshes.remove(compare_mesh)
-            merge_meshes(current_mesh, compare_mesh)
-            current_mesh_modified = True
-        if current_mesh_modified:
-            todo_meshes.append(current_mesh)
+def group_similar_items(meshes, type_threshold):
     # todo group similar items
-    todo_meshes = parent_folder.children()
-    item_types = {1: todo_meshes[0]}
+    item_types = {1: meshes[0]}
     typed_items = {}
     # detect items type
-    for mesh in todo_meshes:
+    for mesh in meshes:
         matched_type = 0
         for item_type in item_types:
-            if is_mesh_similar(mesh, item_types[item_type], type_detect_dist):
+            if is_mesh_similar(mesh, item_types[item_type], type_threshold):
                 matched_type = item_type
+                print('<{}> and <{}> matched, threshold:<{}>'.format(
+                    mesh.name, item_types[item_type].name, type_threshold))
                 break
+            else:
+                print('<{}> and <{}>  (item_type:{})---!!! NOT MATCHED !!!---, threshold:<{}>'.format(
+                    mesh.name, item_types[item_type].name, item_type, type_threshold))
         if matched_type == 0:
             # create new item type
             matched_type = max(item_types) + 1
@@ -298,6 +307,49 @@ def smart_unmerge(meshes, search_dist, largest_rot, largest_pos, type_detect_dis
         move_item_to_group_loc(item, group_loc_name)
 
 
+def smart_unmerge(meshes, largest_rot, largest_pos, merge_closest, search_dist, group_similar, type_threshold):
+    if meshes is None:
+        return
+    if not meshes:
+        return
+    # check for any polygons in the meshes
+    if not any(mesh.geometry.polygons for mesh in meshes):
+        return
+    # todo do unmerge in a new scene to speed up the process
+    modo_unmerge(meshes=meshes, group_similar=group_similar, type_threshold=type_threshold)
+    parent_folder = meshes[0].parent
+    todo_meshes = parent_folder.children()
+    if not merge_closest:
+        for mesh in todo_meshes:
+            set_item_center(mesh=mesh, largest_rot=largest_rot, largest_pos=largest_pos)
+    else:
+        while todo_meshes:
+            current_mesh = todo_meshes.pop(0)
+            current_mesh_modified = False
+            compare_meshes = list(todo_meshes)
+            while compare_meshes:
+                compare_mesh = compare_meshes.pop()
+                if not is_center_near(current_mesh, compare_mesh, search_dist):
+                    continue
+                if not is_bounding_box_intersects(
+                        mesh1=current_mesh,
+                        mesh2=compare_mesh,
+                        search_dist=search_dist,
+                        largest_rot=largest_rot,
+                        largest_pos=largest_pos
+                ):
+                    continue
+                todo_meshes.remove(compare_mesh)
+                merge_meshes(current_mesh, compare_mesh)
+                current_mesh_modified = True
+            if current_mesh_modified:
+                todo_meshes.append(current_mesh)
+    # group similar items
+    if group_similar:
+        todo_meshes = parent_folder.children()
+        group_similar_items(todo_meshes, type_threshold)
+
+
 def is_multiple_islands(mesh):
     if mesh is None:
         return False
@@ -306,17 +358,17 @@ def is_multiple_islands(mesh):
     # check for any polygons in the meshes
     if not mesh.geometry.polygons:
         return
-
     total_count = len(mesh.geometry.polygons)
     island_count = len(mesh.geometry.polygons[0].getIsland())
     if total_count > island_count:
         return True
-
     return False
 
 
 def place_center_at_polygons(mesh, polys, largest_rot, largest_pos):
     if mesh is None:
+        return
+    if mesh.type != 'mesh':
         return
     parent = mesh.parent
     mesh.select(replace=True)
@@ -374,6 +426,11 @@ def place_center_at_polygons(mesh, polys, largest_rot, largest_pos):
 
 
 def get_full_area(mesh):
+    if not mesh:
+        return 0.0
+    if mesh.type != 'mesh':
+        return 0.0
+
     full_area = sum([poly.area for poly in mesh.geometry.polygons])
     return full_area
 
@@ -382,6 +439,8 @@ def get_polygons_find_by_largest(mesh):
     # return matched polygon or [] if none
     if mesh is None:
         return []
+    if mesh.type != 'mesh':
+        return []
     polys = get_polygons_find_by_margins(mesh=mesh, percentage=1.0, margin_low=0.0, margin_high=1.0)
     return polys
 
@@ -389,6 +448,8 @@ def get_polygons_find_by_largest(mesh):
 def get_polygons_find_by_margins(mesh, percentage, margin_low, margin_high):
     # return matched polygon or [] if none
     if mesh is None:
+        return []
+    if mesh.type != 'mesh':
         return []
     min_difference = 1
     poly = []
@@ -422,9 +483,12 @@ def main():
     search_dist = get_user_value(USER_VAL_NAME_SEARCH_DIST)
     largest_rot = get_user_value(USER_VAL_NAME_LARGEST_ROT)
     largest_pos = get_user_value(USER_VAL_NAME_LARGEST_POS)
-    type_detect_pct = get_user_value(USER_VAL_NAME_TYPE_PCT)
+    type_threshold = get_user_value(USER_VAL_NAME_TYPE_PCT)
+    group_similar = get_user_value(USER_VAL_NAME_GROUP_SIMILAR)
+    merge_closest = get_user_value(USER_VAL_NAME_MERGE_CLOSEST)
 
     is_unmerge_regular = False
+    is_group_similar = False
 
     print('lx.args:<{}>'.format(lx.args()))
     if lx.args():
@@ -433,6 +497,9 @@ def main():
             if arg == '-regular':
                 is_unmerge_regular = True
                 print('Modo Unmerge Mesh command used.')
+            elif arg == '-group':
+                is_group_similar = True
+                print('Group Similar Meshes command used.')
 
     selected_meshes = scene.selectedByType(itype=c.MESH_TYPE)
     if not selected_meshes:
@@ -442,10 +509,25 @@ def main():
     parent_items_to(selected_meshes, tmp_grp)
 
     if is_unmerge_regular:
-        modo_unmerge(selected_meshes)
+        modo_unmerge(
+            meshes=selected_meshes,
+            group_similar=group_similar,
+            type_threshold=type_threshold,
+            largest_rot=largest_rot,
+            largest_pos=largest_pos
+        )
+    elif is_group_similar:
+        group_similar_items(meshes=selected_meshes, type_threshold=type_threshold)
     else:
-        smart_unmerge(selected_meshes, search_dist, largest_rot, largest_pos, type_detect_pct)
-
+        smart_unmerge(
+            meshes=selected_meshes,
+            largest_rot=largest_rot,
+            largest_pos=largest_pos,
+            merge_closest=merge_closest,
+            search_dist=search_dist,
+            group_similar=group_similar,
+            type_threshold=type_threshold
+        )
     # set item center
     for item in tmp_grp.children():
         set_item_center(item, largest_rot, largest_pos)

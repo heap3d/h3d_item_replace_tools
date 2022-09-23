@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <package version="801">
 	<kit name="h3d_item_replace_tools" restart="YES">
+		<source target="h3d_item_replace_tools/index.CFG">index.CFG</source>
 		<source target="h3d_item_replace_tools/scripts/auto_largest.py">scripts/auto_largest.py</source>
 		<source target="h3d_item_replace_tools/scripts/channel_to_setup.py">scripts/channel_to_setup.py</source>
 		<source target="h3d_item_replace_tools/scripts/find matching meshes.py">scripts/find matching meshes.py</source>
