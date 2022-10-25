@@ -7,30 +7,16 @@
 # EMAG
 # find a match between template and target meshes
 # ================================
+import sys
 
 import modo
 import modo.constants as c
 import lx
 import uuid
-
-USER_VAL_NAME_TEMPLATE_MESH = 'h3d_pt_template_mesh'
-USER_VAL_NAME_CENTER_IDX = 'h3d_pt_template_poly_center_idx'
-USER_VAL_NAME_CENTER_AREA_PERC = 'h3d_pt_center_area_percent'
-USER_VAL_NAME_AREA_THRESHOLD = 'h3d_pt_center_area_threshold'
-USER_VAL_NAME_USE_LARGEST_POLY = 'h3d_pt_use_largest_poly'
-SELECTION_SET_BASE_NAME = '$delete$ h3d place tools'
-
-scene = modo.scene.current()
-
-
-def get_user_value(name):
-    value = lx.eval('user.value {} ?'.format(name))
-    return value
-
-
-def get_full_area(mesh):
-    full_area = sum([poly.area for poly in mesh.geometry.polygons])
-    return full_area
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
+from kit_constants import *
+from h3d_utils import get_user_value, get_full_mesh_area
+from mesh_islands_to_items import is_mesh_similar, DetectOptions
 
 
 def get_margin_low(percentage, threshold):
@@ -56,7 +42,7 @@ def get_polygons_find_by_percentage(mesh, percentage, threshold):
 
     margin_low = get_margin_low(percentage, threshold)
     margin_high = get_margin_high(percentage, threshold)
-    polys = get_polygons_find_by_margins(mesh, threshold, margin_low, margin_high)
+    polys = get_polygons_find_by_margins(mesh, threshold, margin_low, margin_high, do_multipoly=True)
     return polys
 
 
@@ -68,22 +54,26 @@ def get_polygons_find_by_largest(mesh):
     return polys
 
 
-def get_polygons_find_by_margins(mesh, percentage, margin_low, margin_high):
-    # return matched polygon or [] if none
+def get_polygons_find_by_margins(mesh, percentage, margin_low, margin_high, do_multipoly=False):
     if mesh is None:
         return []
+    # print('mesh<{}>  percentage<{}>  low<{}>  high<{}>'.format(mesh.name, percentage, margin_low, margin_high))
     min_difference = 1
-    poly = []
-    full_area = get_full_area(mesh)
+    polys = []
+    full_area = get_full_mesh_area(mesh)
     for polygon in mesh.geometry.polygons:
         poly_percentage = polygon.area / full_area
+        # print('poly index<{}>  poly percentage<{}>'.format(polygon.index, poly_percentage))
         if margin_low < poly_percentage < margin_high:
-            difference = abs(percentage - poly_percentage)
-            if difference < min_difference:
-                min_difference = difference
-                poly = polygon
-
-    return [poly] if poly else []
+            if do_multipoly:
+                polys.append(polygon)
+            else:
+                difference = abs(percentage - poly_percentage)
+                if difference < min_difference:
+                    min_difference = difference
+                    polys = [polygon]
+    print('get_polygons_find_by_margins():<{}>'.format(list(poly.index for poly in polys)))
+    return polys
 
 
 def get_polygons_find_by_selected(mesh, selected_polys):
@@ -96,11 +86,6 @@ def get_polygons_find_by_selected(mesh, selected_polys):
     # return first selected polygon in mesh item
     print('mesh:<{}>  polygons:<{}>'.format(mesh.name, selected_polys))
     return selected_polys
-
-
-def debug_exit(message):
-    print(message)
-    exit()
 
 
 def place_center_at_polygons(mesh, polys):
@@ -155,6 +140,31 @@ def place_center_at_polygons(mesh, polys):
     lx.eval('item.delete')
     # reset work plane
     lx.eval('workPlane.reset')
+
+
+def get_similar_mesh_center_polys(mesh, center_polys):
+    # print('mesh<{}>  center_polys<{}>'.format(mesh, center_polys))
+    if not mesh:
+        return None
+    if not center_polys:
+        return None
+    comp_mesh = scene.item(get_user_value(USER_VAL_NAME_TEMPLATE_MESH))
+    for poly in center_polys:
+        # duplicate mesh
+        test_mesh = scene.duplicateItem(mesh)
+        test_mesh.name = 'TEST'
+        # select poly
+        lx.eval('select.type polygon')
+        lx.eval('select.drop polygon')
+        test_polys = [(test_mesh.geometry.polygons[poly.index])]
+        # set center to selected poly
+        place_center_at_polygons(test_mesh, test_polys)
+        # test if duplicated mesh similar to template mesh
+        if is_mesh_similar(test_mesh, comp_mesh, detect_options):
+            scene.removeItems(test_mesh)
+            return [poly]
+        scene.removeItems(test_mesh)
+    return []
 
 
 def main():
@@ -217,10 +227,12 @@ def main():
         lx.eval('select.editSet {{{}}} add item:{}'.format(selection_set_name, mesh.id))
 
         if not (polygon_select or select_largest_polygon):
-            place_center_at_polygons(mesh, center_polys)
-            # todo get updated template info: boundary proportions, orientation, relative position of item center
-            # todo get list of polygon candidates
-            # todo check every for boundary proportions, orientation, relative position of the item center
+            filtered_polys = list(center_polys)
+            if not (use_largest_poly or use_selected_polys):
+                # check every for boundary box, center position, center of mass, mesh volume
+                filtered_polys = get_similar_mesh_center_polys(mesh, center_polys)
+                print('center polys <{}>  filtered polys<{}>'.format(center_polys, filtered_polys))
+            place_center_at_polygons(mesh, filtered_polys)
 
     # select processed meshes
     if not use_selected_polys or any(selected_polys.values()):
@@ -235,4 +247,24 @@ def main():
 
 
 if __name__ == '__main__':
+    do_bb = get_user_value(USER_VAL_NAME_DO_BOUNDING_BOX)
+    do_ctr = get_user_value(USER_VAL_NAME_DO_CENTER_POS)
+    do_com = get_user_value(USER_VAL_NAME_DO_COM_POS)
+    do_vol = get_user_value(USER_VAL_NAME_DO_MESH_VOL)
+    bb_thld = get_user_value(USER_VAL_NAME_BB_THRESHOLD)
+    ctr_thld = get_user_value(USER_VAL_NAME_CENTER_THRESHOLD)
+    com_thld = get_user_value(USER_VAL_NAME_COM_THRESHOLD)
+    vol_thld = get_user_value(USER_VAL_NAME_VOL_THRESHOLD)
+
+    detect_options = DetectOptions(do_bounding_box=do_bb,
+                                   do_center_pos=do_ctr,
+                                   do_com_pos=do_com,
+                                   do_mesh_vol=do_vol,
+                                   bb_threshold=bb_thld,
+                                   center_threshold=ctr_thld,
+                                   com_threshold=com_thld,
+                                   vol_threshold=vol_thld)
+
+    scene = modo.scene.current()
+
     main()

@@ -11,8 +11,6 @@
 import modo
 import lx
 
-scene = modo.scene.current()
-
 
 def get_position(locator):
     if not locator.isAnInstance:
@@ -53,33 +51,39 @@ def get_scale(locator):
             return xfrm
 
 
-items = scene.items(itype='locator', superType=True)
-for item in items:
-    print(item.name, item)
-    # if item.type == 'replicator':
-    #     continue
-    item.select(replace=True)
-    position = get_position(item)
-    print('position:<{}>'.format(position))
-    if position:
-        lx.eval('select.drop channel')
-        lx.eval('select.channel {{{}:pos.X@lmb=x}} add'.format(position.id))
-        lx.eval('select.channel {{{}:pos.Y@lmb=x}} add'.format(position.id))
-        lx.eval('select.channel {{{}:pos.Z@lmb=x}} add'.format(position.id))
+def main():
+    items = scene.items(itype='locator', superType=True)
+    for item in items:
+        print(item.name, item)
+        # if item.type == 'replicator':
+        #     continue
+        item.select(replace=True)
+        position = get_position(item)
+        print('position:<{}>'.format(position))
+        if position:
+            lx.eval('select.drop channel')
+            lx.eval('select.channel {{{}:pos.X@lmb=x}} add'.format(position.id))
+            lx.eval('select.channel {{{}:pos.Y@lmb=x}} add'.format(position.id))
+            lx.eval('select.channel {{{}:pos.Z@lmb=x}} add'.format(position.id))
 
-    rotation = get_rotation(item)
-    print('rotation:<{}>'.format(rotation))
-    if rotation:
-        lx.eval('select.channel {{{}:rot.X@lmb=x}} add'.format(rotation.id))
-        lx.eval('select.channel {{{}:rot.Y@lmb=x}} add'.format(rotation.id))
-        lx.eval('select.channel {{{}:rot.Z@lmb=x}} add'.format(rotation.id))
+        rotation = get_rotation(item)
+        print('rotation:<{}>'.format(rotation))
+        if rotation:
+            lx.eval('select.channel {{{}:rot.X@lmb=x}} add'.format(rotation.id))
+            lx.eval('select.channel {{{}:rot.Y@lmb=x}} add'.format(rotation.id))
+            lx.eval('select.channel {{{}:rot.Z@lmb=x}} add'.format(rotation.id))
 
-    scale = get_scale(item)
-    print('scale:<{}>'.format(scale))
-    if scale:
-        lx.eval('select.channel {{{}:scl.X@lmb=x}} add'.format(scale.id))
-        lx.eval('select.channel {{{}:scl.Y@lmb=x}} add'.format(scale.id))
-        lx.eval('select.channel {{{}:scl.Z@lmb=x}} add'.format(scale.id))
+        scale = get_scale(item)
+        print('scale:<{}>'.format(scale))
+        if scale:
+            lx.eval('select.channel {{{}:scl.X@lmb=x}} add'.format(scale.id))
+            lx.eval('select.channel {{{}:scl.Y@lmb=x}} add'.format(scale.id))
+            lx.eval('select.channel {{{}:scl.Z@lmb=x}} add'.format(scale.id))
 
-    if any((position, rotation, scale)):
-        lx.eval('channel.toSetup')
+        if any((position, rotation, scale)):
+            lx.eval('channel.toSetup')
+
+
+if __name__ == '__main__':
+    scene = modo.scene.current()
+    main()

@@ -8,17 +8,13 @@
 # get statistics from selected CAD mesh template
 # to use with place center by template tool
 # ================================
+import sys
 
 import modo
 import modo.constants as c
 import lx
-
-USER_VAL_NAME_TEMPLATE_MESH = 'h3d_pt_template_mesh'
-USER_VAL_NAME_CENTER_IDX = 'h3d_pt_template_poly_center_idx'
-USER_VAL_NAME_CENTER_AREA_PERC = 'h3d_pt_center_area_percent'
-USER_VAL_NAME_AREA_THRESHOLD = 'h3d_pt_center_area_threshold'
-
-scene = modo.scene.current()
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
+from kit_constants import *
 
 
 def get_selected_mesh():
@@ -65,8 +61,6 @@ def main():
 
     selected_mesh = get_selected_mesh()
     for test_mesh in selected_mesh[:1]:
-        # todo get updated template info: boundary proportions, orientation, relative position of item center
-        print('mesh:<{}>'.format(test_mesh))
         set_user_value(USER_VAL_NAME_TEMPLATE_MESH, test_mesh.name)
         selected_polys = test_mesh.geometry.polygons.selected
 
@@ -78,17 +72,12 @@ def main():
         set_user_value(USER_VAL_NAME_CENTER_IDX, center_poly.index)
         full_area = get_full_area(test_mesh)
         percentage = center_poly.area / full_area
-        print('center poly area:<{}>  full area:<{}>  percentage:<{}>'.format(
-            center_poly.area, full_area, percentage))
         set_user_value(USER_VAL_NAME_CENTER_AREA_PERC, percentage)
-        threshold = get_user_value(USER_VAL_NAME_AREA_THRESHOLD)
-        margin_low = get_margin_low(percentage, threshold)
-        margin_high = get_margin_high(percentage, threshold)
-        print('percentage:<{}>  threshold:<{}>  margin low|high:<{}|{}>'.format(
-            percentage, threshold, margin_low, margin_high))
+        lx.eval('@{scripts/find_matching_meshes.py} -selected')
 
     print('done.')
 
 
 if __name__ == '__main__':
+    scene = modo.scene.current()
     main()

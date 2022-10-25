@@ -12,8 +12,6 @@
 import modo
 import modo.constants as c
 
-scene = modo.scene.current()
-
 
 def main():
     print('start...')
@@ -31,4 +29,5 @@ def main():
 
 
 if __name__ == '__main__':
+    scene = modo.scene.current()
     main()

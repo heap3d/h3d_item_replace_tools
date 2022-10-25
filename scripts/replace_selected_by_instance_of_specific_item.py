@@ -9,19 +9,13 @@
 # how to use: select items to replace, add to selection source item to duplicate. Last selected item will be instanced
 # over other selected items
 # ================================
+import sys
 
 import modo
 import modo.constants as c
 import lx
-
-USER_VAL_NAME_SCALE_X = 'h3d_pt_scale_x'
-USER_VAL_NAME_SCALE_Y = 'h3d_pt_scale_y'
-USER_VAL_NAME_SCALE_Z = 'h3d_pt_scale_z'
-USER_VAL_NAME_LOCK_XYZ = 'h3d_pt_lock_xyz'
-USER_VAL_NAME_LOCK_XYZ_ORDER = 'h3d_pt_lock_xyz_order'
-TMP_FOLDER_NAME = 'h3d_pt_replaced_items_to_delete'
-
-scene = modo.scene.current()
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
+from kit_constants import *
 
 
 def get_size(item):
@@ -52,7 +46,11 @@ def get_source_of_instance(item):
     if not item.isAnInstance:
         return item
 
-    item_source = item.itemGraph('source').forward(0)
+    try:
+        item_source = item.itemGraph('source').forward(0)
+    except LookupError:
+        print('No source of instance item found for <{}>'.format(item.name))
+        return None
     if item_source.isAnInstance:
         return get_source_of_instance(item_source)
     else:
@@ -201,7 +199,6 @@ class Constraints:
 
 
 def main():
-    # todo replace void instances issue
     print('')
     print('start...')
 
@@ -236,4 +233,5 @@ def main():
 
 
 if __name__ == '__main__':
+    scene = modo.scene.current()
     main()
