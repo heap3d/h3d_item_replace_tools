@@ -54,12 +54,12 @@ def get_scale(locator):
 def main():
     items = scene.items(itype='locator', superType=True)
     for item in items:
-        print(item.name, item)
+        # print(item.name, item)
         # if item.type == 'replicator':
         #     continue
         item.select(replace=True)
         position = get_position(item)
-        print('position:<{}>'.format(position))
+        # print('position:<{}>'.format(position))
         if position:
             lx.eval('select.drop channel')
             lx.eval('select.channel {{{}:pos.X@lmb=x}} add'.format(position.id))
@@ -67,14 +67,14 @@ def main():
             lx.eval('select.channel {{{}:pos.Z@lmb=x}} add'.format(position.id))
 
         rotation = get_rotation(item)
-        print('rotation:<{}>'.format(rotation))
+        # print('rotation:<{}>'.format(rotation))
         if rotation:
             lx.eval('select.channel {{{}:rot.X@lmb=x}} add'.format(rotation.id))
             lx.eval('select.channel {{{}:rot.Y@lmb=x}} add'.format(rotation.id))
             lx.eval('select.channel {{{}:rot.Z@lmb=x}} add'.format(rotation.id))
 
         scale = get_scale(item)
-        print('scale:<{}>'.format(scale))
+        # print('scale:<{}>'.format(scale))
         if scale:
             lx.eval('select.channel {{{}:scl.X@lmb=x}} add'.format(scale.id))
             lx.eval('select.channel {{{}:scl.Y@lmb=x}} add'.format(scale.id))
