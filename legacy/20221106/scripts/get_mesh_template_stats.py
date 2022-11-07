@@ -8,12 +8,10 @@
 # get statistics from selected CAD mesh template
 # to use with place center by template tool
 # ================================
-
 import sys
 import modo
 import modo.constants as c
 import lx
-
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
 from kit_constants import *
 from h3d_debug import h3dd, is_print_fn_debug
@@ -47,7 +45,7 @@ def main():
         full_area = h3du.get_full_mesh_area(test_mesh)
         percentage = center_poly.area / full_area
         h3du.set_user_value(USER_VAL_NAME_CENTER_AREA_PERC, percentage)
-        lx.eval('@{scripts/set_center_by_selected_polys.py}')
+        lx.eval('@{scripts/find_matching_meshes.py} -selected')
 
     print('done.')
     h3dd.print_fn_out(is_print_fn_debug)

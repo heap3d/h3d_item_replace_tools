@@ -23,13 +23,13 @@ def main():
         print('No mesh items selected')
         return
     # Select the Largest Polygon
-    lx.eval('@{scripts/select_largest_poly.py}')
+    lx.eval('@{scripts/find_matching_meshes.py} -selectlargest')
     # Expand Selection by Angle
     lx.eval('!@scripts/selectByAngle.py false')
     # Set Item Center to the Polygon Selection
-    lx.eval('@{scripts/set_center_by_selected_polys.py}')
+    lx.eval('@{scripts/find_matching_meshes.py} -selected')
     # Replace Selected Items by an Instance with the Last Selected
-    lx.eval('@{scripts/replace_by_instance.py}')
+    lx.eval('@{scripts/replace_selected_by_instance_of_specific_item.py}')
 
 
 if __name__ == '__main__':

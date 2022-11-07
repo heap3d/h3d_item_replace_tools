@@ -7,7 +7,6 @@
 # EMAG
 # h3d debug utilites
 # v1.0
-
 import datetime
 import inspect
 import os.path
@@ -17,8 +16,7 @@ import modo
 class H3dDebug:
     def __init__(self, enable=True, file=None, indent=0, indent_str='    '):
         self.enable = enable
-        self.initial_indent = int(indent)
-        self.indent = self.initial_indent
+        self.indent = indent
         self.indent_str = indent_str
         self.log_path = ''
         self.file_init(file)
@@ -59,13 +57,13 @@ class H3dDebug:
         if message:
             self.print_debug(message, indent=indent)
         if not items:
-            self.print_debug(items, indent=indent + 1)
+            self.print_debug(items, indent=indent+1)
             return
         for i in items:
             if 'modo.item.' in str(type(i)):
-                self.print_debug('<{}>'.format(i.name), indent=indent + 1)
+                self.print_debug('<{}>'.format(i.name), indent=indent+1)
             else:
-                self.print_debug('<{}>'.format(i), indent=indent + 1)
+                self.print_debug('<{}>'.format(i), indent=indent+1)
 
     def file_init(self, file):
         if not self.enable:
@@ -84,7 +82,7 @@ class H3dDebug:
         if not enable:
             return
         caller = inspect.stack()[1][3]
-        message = '{}(): in >>>>'.format(caller)
+        message = '{}(): in >>'.format(caller)
         self.print_debug(message)
         self.indent_inc()
 
@@ -93,7 +91,7 @@ class H3dDebug:
             return
         caller = inspect.stack()[1][3]
         self.indent_dec()
-        message = '<<<< out: {}()'.format(caller)
+        message = '{}(): out <<<'.format(caller)
         self.print_debug(message)
 
     def indent_inc(self, inc=1):
@@ -109,8 +107,7 @@ class H3dDebug:
             return
         f = open(self.log_path, 'w')
         f.close()
-        self.indent = self.initial_indent
 
 
-h3dd = H3dDebug(enable=True, file=modo.Scene().name.rsplit('.')[0] + '.txt')
+h3dd = H3dDebug(enable=True, file=modo.Scene().name.rsplit('.')[0]+'.txt')
 is_print_fn_debug = True

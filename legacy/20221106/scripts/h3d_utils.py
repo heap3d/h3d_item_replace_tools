@@ -7,7 +7,6 @@
 # EMAG
 # h3d utilites
 # v1.0
-
 import lx
 import modo
 import modo.mathutils as mmu
@@ -82,22 +81,6 @@ class H3dUtils:
         v1, v2 = map(mmu.Vector3, mesh.geometry.boundingBox)
         return v2 - v1
 
-    @staticmethod
-    def get_source_of_instance(item):
-        if item is None:
-            return None
-        if not item.isAnInstance:
-            return item
-
-        try:
-            item_source = item.itemGraph('source').forward(0)
-        except LookupError:
-            print('No source of instance item found for <{}>'.format(item.name))
-            return None
-        if item_source.isAnInstance:
-            return H3dUtils.get_source_of_instance(item_source)
-        else:
-            return item_source
-
 
 h3du = H3dUtils()
+

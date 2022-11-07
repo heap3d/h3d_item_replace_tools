@@ -12,14 +12,12 @@ import sys
 import lx
 import modo
 import modo.constants as c
-import modo.mathutils as mmu
-
+import modo.mathutils as mm
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
 from kit_constants import *
 from h3d_utils import h3du
 from h3d_debug import h3dd, is_print_fn_debug
 from modo_get_mesh_volume_buggy import get_volume
-from get_polygons_operations import get_polygons_find_by_percentage, get_polygons_find_by_largest
 
 
 DIV_LIT = '-'
@@ -31,7 +29,7 @@ def get_tmp_name(name):
     return TMP_GRP_NAME_BASE + name
 
 
-def simple_unmerge(meshes, largest_rot, largest_pos):
+def modo_unmerge(meshes, largest_rot, largest_pos):
     h3dd.print_fn_in(is_print_fn_debug)
     if not meshes:
         h3dd.print_fn_out(is_print_fn_debug)
@@ -127,24 +125,15 @@ def is_bounding_box_intersects(mesh1, mesh2, search_dist, largest_rot, largest_p
 
 def get_longest_dist(mesh):
     h3dd.print_fn_in(is_print_fn_debug)
-    # c1, c2 = mesh.geometry.boundingBox
-    # p0 = mmu.Vector3(c1[0], c1[1], c1[2])
-    # p1 = mmu.Vector3(c2[0], c1[1], c1[2])
-    # p2 = mmu.Vector3(c2[0], c1[1], c2[2])
-    # p3 = mmu.Vector3(c1[0], c1[1], c2[2])
-    # p4 = mmu.Vector3(c1[0], c2[1], c1[2])
-    # p5 = mmu.Vector3(c2[0], c2[1], c1[2])
-    # p6 = mmu.Vector3(c2[0], c2[1], c2[2])
-    # p7 = mmu.Vector3(c1[0], c2[1], c2[2])
-    v1, v2 = map(mmu.Vector3, mesh.geometry.boundingBox)
-    p0 = mmu.Vector3(v1.x, v1.y, v1.z)
-    p1 = mmu.Vector3(v2.x, v1.y, v1.z)
-    p2 = mmu.Vector3(v2.x, v1.y, v2.z)
-    p3 = mmu.Vector3(v1.x, v1.y, v2.z)
-    p4 = mmu.Vector3(v1.x, v2.y, v1.z)
-    p5 = mmu.Vector3(v2.x, v2.y, v1.z)
-    p6 = mmu.Vector3(v2.x, v2.y, v2.z)
-    p7 = mmu.Vector3(v1.x, v2.y, v2.z)
+    c1, c2 = mesh.geometry.boundingBox
+    p0 = mm.Vector3(c1[0], c1[1], c1[2])
+    p1 = mm.Vector3(c2[0], c1[1], c1[2])
+    p2 = mm.Vector3(c2[0], c1[1], c2[2])
+    p3 = mm.Vector3(c1[0], c1[1], c2[2])
+    p4 = mm.Vector3(c1[0], c2[1], c1[2])
+    p5 = mm.Vector3(c2[0], c2[1], c1[2])
+    p6 = mm.Vector3(c2[0], c2[1], c2[2])
+    p7 = mm.Vector3(c1[0], c2[1], c2[2])
 
     vectors = (p0, p1, p2, p3, p4, p5, p6, p7)
     lengths = [v.length() for v in vectors]
@@ -160,10 +149,10 @@ def is_center_near(current_mesh, compare_mesh, search_dist):
     if current_mesh.type != 'mesh' or compare_mesh.type != 'mesh':
         h3dd.print_fn_out(is_print_fn_debug)
         return False
-    current_mesh_center = mmu.Matrix4(current_mesh.channel('worldMatrix').get()).position
-    compare_mesh_center = mmu.Matrix4(compare_mesh.channel('worldMatrix').get()).position
-    cur_mesh_vector = mmu.Vector3(current_mesh_center)
-    comp_mesh_vector = mmu.Vector3(compare_mesh_center)
+    current_mesh_center = mm.Matrix4(current_mesh.channel('worldMatrix').get()).position
+    compare_mesh_center = mm.Matrix4(compare_mesh.channel('worldMatrix').get()).position
+    cur_mesh_vector = mm.Vector3(current_mesh_center)
+    comp_mesh_vector = mm.Vector3(compare_mesh_center)
     distance_between_centers = cur_mesh_vector.distanceBetweenPoints(comp_mesh_vector)
 
     cur_mesh_longest_length = get_longest_dist(current_mesh)
@@ -180,15 +169,15 @@ def get_center_ratios(mesh):
     h3dd.print_fn_in(is_print_fn_debug)
     if not mesh:
         h3dd.print_fn_out(is_print_fn_debug)
-        return mmu.Vector3()
+        return mm.Vector3()
     if not mesh.geometry.polygons:
         h3dd.print_fn_out(is_print_fn_debug)
-        return mmu.Vector3()
-    v1, v2 = map(mmu.Vector3, mesh.geometry.boundingBox)
+        return mm.Vector3()
+    v1, v2 = map(mm.Vector3, mesh.geometry.boundingBox)
     size = h3du.get_mesh_bounding_box_size(mesh)
     h3dd.print_fn_out(is_print_fn_debug)
     # return mm.Vector3(abs(c2[0] / (size.x / 2)), abs(c2[1] / (size.y / 2)), abs(c2[2] / (size.z / 2)))
-    return mmu.Vector3(map(abs, (v2.x * 2 / size.x, v2.y * 2 / size.y, v2.z * 2 / size.z)))
+    return mm.Vector3(map(abs, (v2.x * 2 / size.x, v2.y * 2 / size.y, v2.z * 2 / size.z)))
 
 
 def get_max_ratio(val1, val2):
@@ -203,79 +192,67 @@ def is_valid_ratio(val1, val2, threshold):
         print('threshold <{}>'.format(threshold))
         raise ValueError
     result = max(val1, val2) / min(val1, val2) < threshold + 1
-    h3dd.print_debug('val1 <{}>; val2 <{}>; threshold <{}>; val/val <{}>'.format(
-        val1, val2, threshold, max(val1, val2) / min(val1, val2)), is_print_fn_debug)
     h3dd.print_debug(result, is_print_fn_debug)
     h3dd.print_fn_out(is_print_fn_debug)
     return result
 
 
-def is_equal_bounding_box(cur_mesh, cmp_mesh, threshold, options):
+def is_equal_bounding_box(cur_mesh, cmp_mesh, threshold):
     h3dd.print_fn_in(is_print_fn_debug)
     cur_size = h3du.get_mesh_bounding_box_size(cur_mesh)
     cmp_size = h3du.get_mesh_bounding_box_size(cmp_mesh)
-
-    if options.do_bounding_box.x:
-        if not is_valid_ratio(cur_size.x, cmp_size.x, threshold.x):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_bounding_box.y:
-        if not is_valid_ratio(cur_size.y, cmp_size.y, threshold.y):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_bounding_box.z:
-        if not is_valid_ratio(cur_size.z, cmp_size.z, threshold.z):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
+    if not is_valid_ratio(cur_size.x, cmp_size.x, threshold.x):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(cur_size.y, cmp_size.y, threshold.y):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(cur_size.z, cmp_size.z, threshold.z):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
 
     h3dd.print_fn_out(is_print_fn_debug)
     return True
 
 
-def is_equal_center_pos(cur_mesh, cmp_mesh, threshold, options):
+def is_equal_center_pos(cur_mesh, cmp_mesh, threshold):
     h3dd.print_fn_in(is_print_fn_debug)
     cur_bb = cur_mesh.geometry.boundingBox
     cmp_bb = cmp_mesh.geometry.boundingBox
 
-    if options.do_center_pos.x:
-        if not is_valid_ratio(cur_bb[1][0], cmp_bb[1][0], threshold.x):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_center_pos.y:
-        if not is_valid_ratio(cur_bb[1][1], cmp_bb[1][1], threshold.y):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_center_pos.z:
-        if not is_valid_ratio(cur_bb[1][2], cmp_bb[1][2], threshold.z):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
+    if not is_valid_ratio(cur_bb[1][0], cmp_bb[1][0], threshold.x):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(cur_bb[1][1], cmp_bb[1][1], threshold.y):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(cur_bb[1][2], cmp_bb[1][2], threshold.z):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
 
     h3dd.print_fn_out(is_print_fn_debug)
     return True
 
 
-def is_equal_center_of_mass_pos(cur_mesh, cmp_mesh, threshold, options):
+def is_equal_center_of_mass_pos(cur_mesh, cmp_mesh, threshold):
     h3dd.print_fn_in(is_print_fn_debug)
     cur_bb = cur_mesh.geometry.boundingBox
-    cur_com = mmu.Vector3(get_volume(cur_mesh, com=True))
-    cur_com_size = mmu.Vector3(cur_bb[1][0] - cur_com.x, cur_bb[1][1] - cur_com.y, cur_bb[1][2] - cur_com.z)
+    cur_com = mm.Vector3(get_volume(cur_mesh, com=True))
+    cur_com_size = mm.Vector3(cur_bb[1][0] - cur_com.x, cur_bb[1][1] - cur_com.y, cur_bb[1][2] - cur_com.z)
 
     cmp_bb = cmp_mesh.geometry.boundingBox
-    cmp_com = mmu.Vector3(get_volume(cmp_mesh, com=True))
-    cmp_com_size = mmu.Vector3(cmp_bb[1][0] - cmp_com.x, cmp_bb[1][1] - cmp_com.y, cmp_bb[1][2] - cmp_com.z)
+    cmp_com = mm.Vector3(get_volume(cmp_mesh, com=True))
+    cmp_com_size = mm.Vector3(cmp_bb[1][0] - cmp_com.x, cmp_bb[1][1] - cmp_com.y, cmp_bb[1][2] - cmp_com.z)
 
-    if options.do_com_pos.x:
-        if not is_valid_ratio(cur_com_size.x, cmp_com_size.x, threshold.x):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_com_pos.y:
-        if not is_valid_ratio(cur_com_size.y, cmp_com_size.y, threshold.y):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_com_pos.z:
-        if not is_valid_ratio(cur_com_size.z, cmp_com_size.z, threshold.z):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
+    if not is_valid_ratio(cur_com_size.x, cmp_com_size.x, threshold.x):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(cur_com_size.y, cmp_com_size.y, threshold.y):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(cur_com_size.z, cmp_com_size.z, threshold.z):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
 
     h3dd.print_fn_out(is_print_fn_debug)
     return True
@@ -297,7 +274,7 @@ def is_equal_mesh_volume(cur_mesh, cmp_mesh, threshold):
     return True
 
 
-def is_similar_bounding_box(cur_mesh, cmp_mesh, threshold, options):
+def is_similar_bounding_box(cur_mesh, cmp_mesh, threshold):
     h3dd.print_fn_in(is_print_fn_debug)
     # check bounding box
     cur_size = h3du.get_mesh_bounding_box_size(cur_mesh)
@@ -307,24 +284,18 @@ def is_similar_bounding_box(cur_mesh, cmp_mesh, threshold, options):
     rel_y = cmp_size.y / cur_size.y
     rel_z = cmp_size.z / cur_size.z
 
-    if options.do_bounding_box.x:
-        if not is_valid_ratio(rel_y, rel_x, threshold.x):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_bounding_box.y:
-        if not is_valid_ratio(rel_y, rel_z, threshold.y):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_bounding_box.z:
-        if not is_valid_ratio(rel_x, rel_z, threshold.z):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
+    if not is_valid_ratio(rel_y, rel_x, threshold.x):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(rel_y, rel_z, threshold.z):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
 
     h3dd.print_fn_out(is_print_fn_debug)
     return True
 
 
-def is_similar_center_pos(cur_mesh, cmp_mesh, threshold, options):
+def is_similar_center_pos(cur_mesh, cmp_mesh, threshold):
     h3dd.print_fn_in(is_print_fn_debug)
     # check center position
     cur_info_str = h3du.get_mesh_debug_info(cur_mesh)
@@ -337,58 +308,52 @@ def is_similar_center_pos(cur_mesh, cmp_mesh, threshold, options):
     cmp_info_str += 'center ratio <{}>\n'.format(comp_center_ratio)
     h3du.set_mesh_debug_info(cmp_mesh, cmp_info_str)
 
-    if options.do_center_pos.x:
-        if not is_valid_ratio(curr_center_ratio.x, comp_center_ratio.x, threshold.x):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_center_pos.y:
-        if not is_valid_ratio(curr_center_ratio.y, comp_center_ratio.y, threshold.y):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_center_pos.z:
-        if not is_valid_ratio(curr_center_ratio.z, comp_center_ratio.z, threshold.z):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
+    if not is_valid_ratio(curr_center_ratio.x, comp_center_ratio.x, threshold.x):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(curr_center_ratio.y, comp_center_ratio.y, threshold.y):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(curr_center_ratio.z, comp_center_ratio.z, threshold.z):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
 
     h3dd.print_fn_out(is_print_fn_debug)
     return True
 
 
-def is_similar_center_of_mass_pos(cur_mesh, cmp_mesh, threshold, options):
+def is_similar_center_of_mass_pos(cur_mesh, cmp_mesh, threshold):
     h3dd.print_fn_in(is_print_fn_debug)
     # check center of mass position
     cur_bb = cur_mesh.geometry.boundingBox
-    cur_com = mmu.Vector3(get_volume(cur_mesh, com=True))
-    cur_com_size = mmu.Vector3(cur_bb[1][0] - cur_com.x, cur_bb[1][1] - cur_com.y, cur_bb[1][2] - cur_com.z)
-    cur_com_ratio = mmu.Vector3(cur_com_size.x / cur_bb[1][0], cur_com_size.y / cur_bb[1][1],
-                                cur_com_size.z / cur_bb[1][2])
+    cur_com = mm.Vector3(get_volume(cur_mesh, com=True))
+    cur_com_size = mm.Vector3(cur_bb[1][0] - cur_com.x, cur_bb[1][1] - cur_com.y, cur_bb[1][2] - cur_com.z)
+    cur_com_ratio = mm.Vector3(cur_com_size.x / cur_bb[1][0], cur_com_size.y / cur_bb[1][1],
+                               cur_com_size.z / cur_bb[1][2])
     cur_info_str = h3du.get_mesh_debug_info(cur_mesh)
     cur_info_str += 'bb <{}>\ncom <{}> com size <{}>\ncom ratio <{}>\n'.format(list(cur_bb), list(cur_com),
-                                                                               list(cur_com_size), list(cur_com_ratio))
+                                                                           list(cur_com_size), list(cur_com_ratio))
     h3du.set_mesh_debug_info(cur_mesh, cur_info_str)
 
     cmp_bb = cmp_mesh.geometry.boundingBox
-    cmp_com = mmu.Vector3(get_volume(cmp_mesh, com=True))
-    cmp_com_size = mmu.Vector3(cmp_bb[1][0] - cmp_com.x, cmp_bb[1][1] - cmp_com.y, cmp_bb[1][2] - cmp_com.z)
-    cmp_com_ratio = mmu.Vector3(cmp_com_size.x / cmp_bb[1][0], cmp_com_size.y / cmp_bb[1][1],
-                                cmp_com_size.z / cmp_bb[1][2])
+    cmp_com = mm.Vector3(get_volume(cmp_mesh, com=True))
+    cmp_com_size = mm.Vector3(cmp_bb[1][0] - cmp_com.x, cmp_bb[1][1] - cmp_com.y, cmp_bb[1][2] - cmp_com.z)
+    cmp_com_ratio = mm.Vector3(cmp_com_size.x / cmp_bb[1][0], cmp_com_size.y / cmp_bb[1][1],
+                               cmp_com_size.z / cmp_bb[1][2])
     cmp_info_str = h3du.get_mesh_debug_info(cmp_mesh)
     cmp_info_str += 'bb <{}>\ncom <{}> com size <{}>\ncom ratio <{}>\n'.format(list(cmp_bb), list(cmp_com),
-                                                                               list(cmp_com_size), list(cmp_com_ratio))
+                                                                           list(cmp_com_size), list(cmp_com_ratio))
     h3du.set_mesh_debug_info(cmp_mesh, cmp_info_str)
 
-    if options.do_com_pos.x:
-        if not is_valid_ratio(cur_com_ratio.x, cmp_com_ratio.x, threshold.x):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_com_pos.y:
-        if not is_valid_ratio(cur_com_ratio.y, cmp_com_ratio.y, threshold.y):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
-    if options.do_com_pos.z:
-        if not is_valid_ratio(cur_com_ratio.z, cmp_com_ratio.z, threshold.z):
-            h3dd.print_fn_out(is_print_fn_debug)
-            return False
+    if not is_valid_ratio(cur_com_ratio.x, cmp_com_ratio.x, threshold.x):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(cur_com_ratio.y, cmp_com_ratio.y, threshold.y):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
+    if not is_valid_ratio(cur_com_ratio.z, cmp_com_ratio.z, threshold.z):
+        h3dd.print_fn_out(is_print_fn_debug)
+        return False
 
     h3dd.print_fn_out(is_print_fn_debug)
     return True
@@ -456,18 +421,17 @@ def is_mesh_similar(cur_mesh, cmp_mesh, options):
     h3du.set_mesh_debug_info(cur_mesh, '')
     h3du.set_mesh_debug_info(cmp_mesh, '')
     # do checks
-    h3dd.print_debug('cur_mesh <{}>:<{}>; cmp_mesh <{}>:<{}>'.format(cur_mesh.name, cur_mesh, cmp_mesh.name, cmp_mesh),
-                     is_print_fn_debug)
+    h3dd.print_debug('cur_mesh <{}>:<{}>; cmp_mesh <{}>:<{}>'.format(cur_mesh.name, cur_mesh, cmp_mesh.name, cmp_mesh), is_print_fn_debug)
     if any(options.do_bounding_box):
-        if not is_similar_bounding_box(cur_mesh, cmp_mesh, options.bb_threshold, options):
+        if not is_similar_bounding_box(cur_mesh, cmp_mesh, options.bb_threshold):
             h3dd.print_fn_out(is_print_fn_debug)
             return False
     if any(options.do_center_pos):
-        if not is_similar_center_pos(cur_mesh, cmp_mesh, options.center_threshold, options):
+        if not is_similar_center_pos(cur_mesh, cmp_mesh, options.center_threshold):
             h3dd.print_fn_out(is_print_fn_debug)
             return False
     if any(options.do_com_pos):
-        if not is_similar_center_of_mass_pos(cur_mesh, cmp_mesh, options.com_threshold, options):
+        if not is_similar_center_of_mass_pos(cur_mesh, cmp_mesh, options.com_threshold):
             h3dd.print_fn_out(is_print_fn_debug)
             return False
     if options.do_mesh_vol:
@@ -493,23 +457,19 @@ def is_mesh_equal(cur_mesh, cmp_mesh, options):
         h3dd.print_fn_out(is_print_fn_debug)
         return False
     # do checks
-    h3dd.print_debug(
-        'Comparing bounding box of cur_mesh <{}> vs cmp_mesh <{}>   threshold <{}>...'.format(cur_mesh.name,
-                                                                                              cmp_mesh.name,
-                                                                                              options.bb_threshold),
-        is_print_fn_debug)
+    h3dd.print_debug('Comparing bounding box of cur_mesh <{}> vs cmp_mesh <{}>   threshold <{}>...'.format(cur_mesh.name, cmp_mesh.name, options.bb_threshold), is_print_fn_debug)
     if any(options.do_bounding_box):
-        if not is_equal_bounding_box(cur_mesh, cmp_mesh, options.bb_threshold, options):
+        if not is_equal_bounding_box(cur_mesh, cmp_mesh, options.bb_threshold):
             h3dd.print_debug('bb is not equal', is_print_fn_debug)
             h3dd.print_fn_out(is_print_fn_debug)
             return False
     if any(options.do_center_pos):
-        if not is_equal_center_pos(cur_mesh, cmp_mesh, options.center_threshold, options):
+        if not is_equal_center_pos(cur_mesh, cmp_mesh, options.center_threshold):
             h3dd.print_debug('center pos is not equal', is_print_fn_debug)
             h3dd.print_fn_out(is_print_fn_debug)
             return False
     if any(options.do_com_pos):
-        if not is_equal_center_of_mass_pos(cur_mesh, cmp_mesh, options.com_threshold, options):
+        if not is_equal_center_of_mass_pos(cur_mesh, cmp_mesh, options.com_threshold):
             h3dd.print_debug('com is not equal', is_print_fn_debug)
             h3dd.print_fn_out(is_print_fn_debug)
             return False
@@ -578,8 +538,7 @@ def set_mesh_info(store_item, mesh_source):
     if mesh_source is None:
         h3dd.print_fn_out(is_print_fn_debug)
         return
-    h3dd.print_debug('store_ite {}>; mesh_source <{}>'.format(store_item.name, mesh_source.name),
-                     enable=is_print_fn_debug)
+    h3dd.print_debug('store_ite {}>; mesh_source <{}>'.format(store_item.name, mesh_source.name), enable=is_print_fn_debug)
     store_item.select(replace=True)
     lx.eval('item.tagAdd CMMT')
     lx.eval('item.tag string CMMT "{}"'.format(mesh_source.name))
@@ -622,8 +581,7 @@ def group_equal_meshes(meshes, options):
         return
     # get similar groups list with unsorted meshes
     working_similar_groups = get_group_locators_by_template(GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)
-    h3dd.print_items(list(i.name for i in working_similar_groups), message='initial working_similar_groups:',
-                     enable=is_print_fn_debug)
+    h3dd.print_items(list(i.name for i in working_similar_groups), message='initial working_similar_groups:', enable=is_print_fn_debug)
     h3dd.print_debug('working_similar_groups cycle start:', is_print_fn_debug)
     h3dd.indent_inc()
     for similar_group in working_similar_groups:
@@ -721,9 +679,7 @@ def group_similar_items(meshes, options):
         )
         # add new_similar_type_group to the similar_groups
         similar_groups.append(new_similar_type_group)
-        h3dd.print_items(list(i.name for i in similar_groups),
-                         message='similar_groups added: <{}>'.format(new_similar_type_group.name),
-                         enable=is_print_fn_debug)
+        h3dd.print_items(list(i.name for i in similar_groups), message='similar_groups added: <{}>'.format(new_similar_type_group.name), enable=is_print_fn_debug)
         # set mesh info
         set_mesh_info(new_similar_type_group, mesh)
 
@@ -734,7 +690,7 @@ def group_similar_items(meshes, options):
     h3dd.print_fn_out(is_print_fn_debug)
 
 
-def smart_unmerge(meshes, largest_rot, largest_pos, merge_closest, search_dist, area_threshold):
+def smart_unmerge(meshes, largest_rot, largest_pos, merge_closest, search_dist):
     h3dd.print_fn_in(is_print_fn_debug)
     if not meshes:
         h3dd.print_fn_out(is_print_fn_debug)
@@ -743,9 +699,9 @@ def smart_unmerge(meshes, largest_rot, largest_pos, merge_closest, search_dist, 
     if not any(mesh.geometry.polygons for mesh in meshes):
         h3dd.print_fn_out(is_print_fn_debug)
         return
-    # todo do unmerge in a new scene to speed up the process
-    todo_meshes = simple_unmerge(meshes=meshes, largest_rot=largest_rot, largest_pos=largest_pos)
+    modo_unmerge(meshes=meshes, largest_rot=largest_rot, largest_pos=largest_pos)
     parent_folder = meshes[0].parent
+    todo_meshes = parent_folder.children()
     if merge_closest:
         while todo_meshes:
             current_mesh = todo_meshes.pop(0)
@@ -768,14 +724,10 @@ def smart_unmerge(meshes, largest_rot, largest_pos, merge_closest, search_dist, 
                 current_mesh_modified = True
             if current_mesh_modified:
                 todo_meshes.append(current_mesh)
-
-    result_meshes = parent_folder.children()
-    for mesh in result_meshes:
-        set_item_center_normalized(mesh=mesh, largest_rot=largest_rot, largest_pos=largest_pos,
-                                   threshold=area_threshold)
-    # return result meshes
+    # return todo_meshes
+    todo_meshes = parent_folder.children()
     h3dd.print_fn_out(is_print_fn_debug)
-    return result_meshes
+    return todo_meshes
 
 
 def is_multiple_islands(mesh):
@@ -811,8 +763,7 @@ def place_center_at_polygons(mesh, polys, largest_rot, largest_pos):
         h3dd.print_fn_out(is_print_fn_debug)
         return
     parent = mesh.parent
-    h3dd.print_debug('mesh <{}>:<{}>; parent <{}>; polys <{}>'.format(mesh.name, mesh, parent.name, polys),
-                     is_print_fn_debug)
+    h3dd.print_debug('mesh <{}>:<{}>; parent <{}>; polys <{}>'.format(mesh.name, mesh, parent.name, polys), is_print_fn_debug)
     mesh.select(replace=True)
     lx.eval('item.editorColor darkgrey')
 
@@ -869,6 +820,45 @@ def place_center_at_polygons(mesh, polys, largest_rot, largest_pos):
     h3dd.print_fn_out(is_print_fn_debug)
 
 
+def get_polygons_find_by_largest(mesh):
+    h3dd.print_fn_in(is_print_fn_debug)
+    # return matched polygon or [] if none
+    if mesh is None:
+        h3dd.print_fn_out(is_print_fn_debug)
+        return []
+    if mesh.type != 'mesh':
+        h3dd.print_fn_out(is_print_fn_debug)
+        return []
+    polys = get_polygons_find_by_margins(mesh=mesh, percentage=1.0, margin_low=0.0, margin_high=1.0)
+    h3dd.print_debug('polys <{}>'.format(polys), is_print_fn_debug)
+    h3dd.print_fn_out(is_print_fn_debug)
+    return polys
+
+
+def get_polygons_find_by_margins(mesh, percentage, margin_low, margin_high):
+    h3dd.print_fn_in(is_print_fn_debug)
+    # return matched polygon or [] if none
+    if not mesh:
+        h3dd.print_fn_out(is_print_fn_debug)
+        return []
+    if mesh.type != 'mesh':
+        h3dd.print_fn_out(is_print_fn_debug)
+        return []
+    min_difference = 1
+    poly = []
+    full_area = h3du.get_full_mesh_area(mesh)
+    for polygon in mesh.geometry.polygons:
+        poly_percentage = polygon.area / full_area
+        if margin_low < poly_percentage < margin_high:
+            difference = abs(percentage - poly_percentage)
+            if difference < min_difference:
+                min_difference = difference
+                poly = polygon
+
+    h3dd.print_fn_out(is_print_fn_debug)
+    return [poly] if poly else []
+
+
 def set_item_center(mesh, largest_rot, largest_pos):
     h3dd.print_fn_in(is_print_fn_debug)
     if not mesh:
@@ -878,80 +868,9 @@ def set_item_center(mesh, largest_rot, largest_pos):
         polys = get_polygons_find_by_largest(mesh)
     else:
         polys = []
-    place_center_at_polygons(mesh=mesh, polys=polys, largest_rot=largest_rot, largest_pos=largest_pos)
+    place_center_at_polygons(mesh, polys, largest_rot, largest_pos)
 
     h3dd.print_fn_out(is_print_fn_debug)
 
 
-def is_center_normalized(mesh):
-    h3dd.print_fn_in(is_print_fn_debug)
-    if not mesh:
-        h3dd.print_debug('not mesh; return False')
-        h3dd.print_fn_out(is_print_fn_debug)
-        return False
-    # get center of mass
-    com = mmu.Vector3(get_volume(mesh, com=True))
-    if com.y < 0:
-        h3dd.print_debug('com.y < 0; return False')
-        h3dd.print_fn_out(is_print_fn_debug)
-        return False
-
-    h3dd.print_debug('return True')
-    h3dd.print_fn_out(is_print_fn_debug)
-    return True
-
-
-def set_item_center_normalized(mesh, largest_rot, largest_pos, threshold):
-    h3dd.print_fn_in(is_print_fn_debug)
-    if not mesh:
-        h3dd.print_debug('not mesh')
-        h3dd.print_fn_out(is_print_fn_debug)
-        return
-    if not (largest_rot or largest_pos):
-        h3dd.print_debug('not (largest_rot or largest_pos)')
-        h3dd.print_fn_out(is_print_fn_debug)
-        return
-    polys = get_polygons_find_by_largest(mesh)
-    h3dd.print_debug(
-        'mesh <{}>:<{}>; largest_rot <{}>; largest_pos <{}>; threshold <{}>'.format(
-            mesh.name, mesh, largest_rot, largest_pos, threshold),
-        is_print_fn_debug)
-    h3dd.print_items(polys, 'polys:', is_print_fn_debug)
-    filtered_poly = None
-
-    largest_poly = polys[0]
-    # get largest polygon relative area
-    rel_area_percent = largest_poly.area / h3du.get_full_mesh_area(mesh)
-    h3dd.print_debug('largest_poly index <{}>; rel_area_percent <{}>; area <{}>; mesh full area <{}>'.format(
-        largest_poly.index, rel_area_percent, largest_poly.area, h3du.get_full_mesh_area(mesh)))
-    polygon_candidates = get_polygons_find_by_percentage(
-        mesh=mesh,
-        percentage=rel_area_percent,
-        threshold=threshold)
-    h3dd.print_items(polygon_candidates, 'polygon_candidates:', is_print_fn_debug)
-    h3dd.print_debug('polygon_candidates cycle start:')
-    for poly in polygon_candidates:
-        # duplicate mesh
-        test_mesh = scene.duplicateItem(mesh)
-        test_mesh.name = '{} [{}]'.format(mesh.name, poly.index)
-        # select poly
-        lx.eval('select.type polygon')
-        lx.eval('select.drop polygon')
-        test_polys = [(test_mesh.geometry.polygons[poly.index])]
-        h3dd.print_items(test_polys, 'test_polys:', is_print_fn_debug)
-        # set center to selected poly
-        place_center_at_polygons(mesh=test_mesh, polys=test_polys, largest_rot=largest_rot, largest_pos=largest_pos)
-        if is_center_normalized(test_mesh):
-            filtered_poly = mesh.geometry.polygons[poly.index]
-        scene.removeItems(test_mesh)
-        if filtered_poly:
-            break
-
-    result_polys = [filtered_poly] if filtered_poly else [largest_poly]
-    h3dd.print_items(result_polys, 'result_polys:', is_print_fn_debug)
-    place_center_at_polygons(mesh=mesh, polys=result_polys, largest_rot=largest_rot, largest_pos=largest_pos)
-
-    h3dd.print_fn_out(is_print_fn_debug)
-
-
-scene = modo.scene.current()
+scene = modo.Scene()

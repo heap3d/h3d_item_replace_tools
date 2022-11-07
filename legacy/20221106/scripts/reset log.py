@@ -6,10 +6,8 @@
 # modo python
 # EMAG
 # resetting log file with current modo scene name
-
 import sys
 import lx
-
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
 from h3d_debug import h3dd
 

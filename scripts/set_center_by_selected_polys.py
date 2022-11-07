@@ -1,0 +1,59 @@
+#!/usr/bin/python
+# ================================
+# (C)2022 Dmytro Holub
+# heap3d@gmail.com
+# --------------------------------
+# modo python
+# EMAG
+# set item center by selected polygons
+# ================================
+
+import sys
+import modo
+import modo.constants as c
+import lx
+import uuid
+
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
+from kit_constants import *
+from h3d_debug import h3dd, is_print_fn_debug
+from find_matching_meshes import place_center_at_polygons
+from get_polygons_operations import get_polygons_find_by_selected
+
+
+def main():
+    h3dd.print_debug('\n\n----- set_center_by_selected_polys.py -----\n', is_print_fn_debug)
+    h3dd.print_fn_in(is_print_fn_debug)
+    print('')
+    print('start...')
+
+    scene = modo.scene.current()
+    selected_meshes = scene.selectedByType(itype=c.MESH_TYPE)
+    set_uuid = str(uuid.uuid4())
+    selection_set_name = '{} - {}'.format(SELECTION_SET_BASE_NAME, set_uuid)
+    selected_polys = {mesh.id: mesh.geometry.polygons.selected for mesh in selected_meshes}
+
+    for mesh in selected_meshes:
+        center_polys = get_polygons_find_by_selected(mesh, selected_polys[mesh.id])
+        # skip if mesh doesn't matches to template (returned index is -1)
+        if not center_polys:
+            continue
+        # enter item mode and add matched mesh to selection set
+        lx.eval('select.type item')
+        lx.eval('select.editSet {{{}}} add item:{}'.format(selection_set_name, mesh.id))
+
+        place_center_at_polygons(mesh, center_polys)
+
+    # select processed meshes
+    try:
+        lx.eval('!select.useSet "{}" replace'.format(selection_set_name))
+    except RuntimeError:
+        print('No meshes were processed.')
+        print('Try to update template mesh info')
+
+    print('done.')
+    h3dd.print_fn_out(is_print_fn_debug)
+
+
+if __name__ == '__main__':
+    main()
