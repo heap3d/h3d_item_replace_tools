@@ -14,14 +14,14 @@ import modo.constants as c
 import lx
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from h3d_debug import h3dd, is_print_fn_debug
+from h3d_debug import h3dd
 from h3d_utils import h3du
 from replace_items_tools import Constraints, item_align
 
 
 def main():
-    h3dd.print_debug('\n\n----- replace_by_item.py -----\n', is_print_fn_debug)
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_debug('\n\n----- replace_by_item.py -----\n')
+    h3dd.print_fn_in()
     print('')
     print('start...')
 
@@ -43,7 +43,7 @@ def main():
         source_mesh.select(replace=True)
 
     print('done.')
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
 
 
 if __name__ == '__main__':

@@ -15,21 +15,21 @@ import modo.constants as c
 import lx
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from kit_constants import *
-from h3d_debug import h3dd, is_print_fn_debug
+from h3d_kit_constants import *
+from h3d_debug import h3dd
 from h3d_utils import h3du
 
 
 def get_selected_mesh():
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_fn_in()
     selected = scene.selectedByType(itype=c.MESH_TYPE)
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
     return selected[:1]
 
 
 def main():
-    h3dd.print_debug('\n\n----- get_mesh_template_stats.py -----\n', is_print_fn_debug)
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_debug('\n\n----- get_mesh_template_stats.py -----\n')
+    h3dd.print_fn_in()
     print('')
     print('start...')
 
@@ -50,7 +50,7 @@ def main():
         lx.eval('@{scripts/set_center_by_selected_polys.py}')
 
     print('done.')
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
 
 
 if __name__ == '__main__':

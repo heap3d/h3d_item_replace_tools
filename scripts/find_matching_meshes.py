@@ -14,19 +14,19 @@ import modo.constants as c
 import lx
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from kit_constants import *
+from h3d_kit_constants import *
 from h3d_utils import h3du
-from h3d_debug import h3dd, is_print_fn_debug
+from h3d_debug import h3dd
 from mesh_islands_to_items import is_mesh_similar, DetectOptions
 
 
 def place_center_at_polygons(mesh, polys):
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_fn_in()
     if not mesh:
-        h3dd.print_fn_out(is_print_fn_debug)
+        h3dd.print_fn_out()
         return
     if not polys:
-        h3dd.print_fn_out(is_print_fn_debug)
+        h3dd.print_fn_out()
         return
 
     parent = mesh.parent
@@ -75,19 +75,19 @@ def place_center_at_polygons(mesh, polys):
     lx.eval('item.delete')
     # reset work plane
     lx.eval('workPlane.reset')
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
 
 
 def get_similar_mesh_center_polys(cur_mesh, cmp_mesh, center_polys):
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_fn_in()
     if not cur_mesh:
-        h3dd.print_fn_out(is_print_fn_debug)
+        h3dd.print_fn_out()
         return []
     if not center_polys:
-        h3dd.print_fn_out(is_print_fn_debug)
+        h3dd.print_fn_out()
         return []
     if cur_mesh.name == cmp_mesh.name:
-        h3dd.print_fn_out(is_print_fn_debug)
+        h3dd.print_fn_out()
         return [cur_mesh.geometry.polygons[h3du.get_user_value(USER_VAL_NAME_CENTER_IDX)]]
     for poly in center_polys:
         # duplicate mesh
@@ -102,23 +102,23 @@ def get_similar_mesh_center_polys(cur_mesh, cmp_mesh, center_polys):
         # test if duplicated mesh similar to template mesh
         if is_mesh_similar(test_mesh, cmp_mesh, detect_options):
             scene.removeItems(test_mesh)
-            h3dd.print_fn_out(is_print_fn_debug)
+            h3dd.print_fn_out()
             return [poly]
         scene.removeItems(test_mesh)
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
     return []
 
 
 def get_similar_mesh_center_polys_Y_axis(cur_mesh, cmp_mesh, center_polys):
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_fn_in()
     if not cur_mesh:
-        h3dd.print_fn_out(is_print_fn_debug)
+        h3dd.print_fn_out()
         return []
     if not center_polys:
-        h3dd.print_fn_out(is_print_fn_debug)
+        h3dd.print_fn_out()
         return []
     if cur_mesh.name == cmp_mesh.name:
-        h3dd.print_fn_out(is_print_fn_debug)
+        h3dd.print_fn_out()
         return [cur_mesh.geometry.polygons[h3du.get_user_value(USER_VAL_NAME_CENTER_IDX)]]
     for poly in center_polys:
         # duplicate mesh
@@ -141,10 +141,10 @@ def get_similar_mesh_center_polys_Y_axis(cur_mesh, cmp_mesh, center_polys):
         # test if duplicated mesh similar to template mesh
         if is_mesh_similar(test_mesh, cmp_mesh, modified_detect_options):
             scene.removeItems(test_mesh)
-            h3dd.print_fn_out(is_print_fn_debug)
+            h3dd.print_fn_out()
             return [poly]
         scene.removeItems(test_mesh)
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
     return []
 
 

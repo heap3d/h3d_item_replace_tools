@@ -8,10 +8,16 @@
 # h3d debug utilites
 # v1.0
 
+import sys
 import datetime
 import inspect
 import os.path
 import modo
+import lx
+
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
+from h3d_kit_constants import *
+from h3d_utils import h3du
 
 
 class H3dDebug:
@@ -23,10 +29,8 @@ class H3dDebug:
         self.log_path = ''
         self.file_init(file)
 
-    def print_debug(self, message, enable=True, indent=0):
+    def print_debug(self, message, indent=0):
         if not self.enable:
-            return
-        if not enable:
             return
         self.indent += indent
         curtime = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S.%f')
@@ -38,6 +42,8 @@ class H3dDebug:
         self.indent -= indent
 
     def print_to_file(self, message):
+        if not self.enable:
+            return
         if not self.log_path:
             self.print_to_sys(message)
             return
@@ -45,16 +51,19 @@ class H3dDebug:
             f.write(message)
             f.write('\n')
 
-    @staticmethod
-    def print_to_sys(message):
+    def print_to_sys(self, message):
+        if not self.enable:
+            return
         print(message)
 
     def exit(self, message='debug exit'):
+        if not self.enable:
+            return
         self.print_debug(message)
         exit()
 
-    def print_items(self, items, message=None, enable=True, indent=0):
-        if not enable:
+    def print_items(self, items, message=None, indent=0):
+        if not self.enable:
             return
         if message:
             self.print_debug(message, indent=indent)
@@ -68,28 +77,26 @@ class H3dDebug:
                 self.print_debug('<{}>'.format(i), indent=indent + 1)
 
     def file_init(self, file):
-        if not self.enable:
-            return
         if not file:
             return
         scene_path = modo.Scene().filename
         scene_dir = os.path.dirname(scene_path)
         log_path = os.path.join(scene_dir, file)
-        with open(log_path, 'w'):
-            # reinitialize log file
-            pass
         self.log_path = log_path
+        if not self.enable:
+            return
+        self.log_reset()
 
-    def print_fn_in(self, enable=True):
-        if not enable:
+    def print_fn_in(self):
+        if not self.enable:
             return
         caller = inspect.stack()[1][3]
         message = '{}(): in >>>>'.format(caller)
         self.print_debug(message)
         self.indent_inc()
 
-    def print_fn_out(self, enable=True):
-        if not enable:
+    def print_fn_out(self):
+        if not self.enable:
             return
         caller = inspect.stack()[1][3]
         self.indent_dec()
@@ -97,20 +104,23 @@ class H3dDebug:
         self.print_debug(message)
 
     def indent_inc(self, inc=1):
+        if not self.enable:
+            return
         self.indent += inc
 
     def indent_dec(self, dec=1):
-        self.indent -= dec
-
-    def reset_log(self):
         if not self.enable:
             return
+        self.indent -= dec
+
+    def log_reset(self):
         if not self.log_path:
             return
-        f = open(self.log_path, 'w')
-        f.close()
+        with open(self.log_path, 'w'):
+            # reinitialize log file
+            pass
         self.indent = self.initial_indent
 
 
-h3dd = H3dDebug(enable=True, file=modo.Scene().name.rsplit('.')[0] + '.txt')
-is_print_fn_debug = True
+do_save_log = h3du.get_user_value(USER_VAL_NAME_SAVE_LOG)
+h3dd = H3dDebug(enable=do_save_log, file=modo.Scene().name.rsplit('.')[0] + '.txt')

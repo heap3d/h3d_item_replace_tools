@@ -13,7 +13,7 @@ import modo
 import lx
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from kit_constants import *
+from h3d_kit_constants import *
 from h3d_utils import h3du
 
 

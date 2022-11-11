@@ -18,17 +18,17 @@ import modo
 import modo.constants as c
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from kit_constants import *
+from h3d_kit_constants import *
 from h3d_utils import h3du
-from h3d_debug import h3dd, is_print_fn_debug
+from h3d_debug import h3dd
 from mesh_islands_to_items import get_tmp_name, simple_unmerge, group_similar_items, group_equal_meshes, DetectOptions
 
 
 def main():
-    h3dd.print_debug('\n\n----- simple_unmerge_mesh.py -----\n', is_print_fn_debug)
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_debug('\n\n----- simple_unmerge_mesh.py -----\n')
+    h3dd.print_fn_in()
     print('')
-    print('start...')
+    print('start simple_unmerge_mesh.py...')
 
     scene = modo.scene.current()
     largest_rot = h3du.get_user_value(USER_VAL_NAME_LARGEST_ROT)
@@ -77,12 +77,12 @@ def main():
 
     selected_meshes = scene.selectedByType(itype=c.MESH_TYPE)
     if not selected_meshes:
-        h3dd.print_fn_out(is_print_fn_debug)
+        print('No meshes selected.\ndone.')
+        h3dd.print_fn_out()
         return
     # create temp group folder
     tmp_grp = scene.addItem(itype=c.GROUPLOCATOR_TYPE, name=get_tmp_name(selected_meshes[0].name))
-    h3dd.print_debug('selected_meshes <{}>; tmp_grp <{}>'.format(list(i.name for i in selected_meshes), tmp_grp.name),
-                     is_print_fn_debug)
+    h3dd.print_debug('selected_meshes <{}>; tmp_grp <{}>'.format(list(i.name for i in selected_meshes), tmp_grp.name))
     h3du.parent_items_to(selected_meshes, tmp_grp)
 
     todo_meshes = simple_unmerge(meshes=selected_meshes, largest_rot=largest_rot, largest_pos=largest_pos)
@@ -99,7 +99,7 @@ def main():
         item.select()
 
     print('done.')
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
 
 
 if __name__ == '__main__':

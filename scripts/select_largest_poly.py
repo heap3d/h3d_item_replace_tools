@@ -15,14 +15,14 @@ import lx
 import uuid
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from kit_constants import *
-from h3d_debug import h3dd, is_print_fn_debug
+from h3d_kit_constants import *
+from h3d_debug import h3dd
 from get_polygons_operations import get_polygons_find_by_largest
 
 
 def main():
-    h3dd.print_debug('\n\n----- select_largest_poly.py -----\n', is_print_fn_debug)
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_debug('\n\n----- select_largest_poly.py -----\n')
+    h3dd.print_fn_in()
     print('')
     print('start...')
 
@@ -58,7 +58,7 @@ def main():
         polygon.select()
 
     print('done.')
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
 
 
 if __name__ == '__main__':

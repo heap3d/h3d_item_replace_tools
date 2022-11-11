@@ -15,16 +15,16 @@ import lx
 import uuid
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from kit_constants import *
+from h3d_kit_constants import *
 from h3d_utils import h3du
-from h3d_debug import h3dd, is_print_fn_debug
+from h3d_debug import h3dd
 from find_matching_meshes import get_similar_mesh_center_polys_Y_axis
 from get_polygons_operations import get_polygons_find_by_percentage
 
 
 def main():
-    h3dd.print_debug('\n\n----- select_poly_by_template.py -----\n', is_print_fn_debug)
-    h3dd.print_fn_in(is_print_fn_debug)
+    h3dd.print_debug('\n\n----- select_poly_by_template.py -----\n')
+    h3dd.print_fn_in()
     print('')
     print('start...')
 
@@ -40,14 +40,14 @@ def main():
 
     for mesh in selected_meshes:
         cmp_mesh = scene.item(h3du.get_user_value(USER_VAL_NAME_TEMPLATE_MESH))
-        h3dd.print_debug('cmp_mesh <{}>'.format(cmp_mesh.name), is_print_fn_debug)
+        h3dd.print_debug('cmp_mesh <{}>'.format(cmp_mesh.name))
         poly_candidates = get_polygons_find_by_percentage(mesh, area_percentage, area_threshold)
-        h3dd.print_items(list(p.index for p in poly_candidates), message='poly_candidates:', enable=is_print_fn_debug)
+        h3dd.print_items(list(p.index for p in poly_candidates), message='poly_candidates:')
 
         # get polygons for modified detect options list using Y axis only
         center_polys = get_similar_mesh_center_polys_Y_axis(mesh, cmp_mesh, poly_candidates)
 
-        h3dd.print_items(list(p.index for p in center_polys), message='center_polys:', enable=is_print_fn_debug)
+        h3dd.print_items(list(p.index for p in center_polys), message='center_polys:')
         # skip if mesh doesn't matches to template (returned index is -1)
         if not center_polys:
             continue
@@ -70,7 +70,7 @@ def main():
         polygon.select()
 
     print('done.')
-    h3dd.print_fn_out(is_print_fn_debug)
+    h3dd.print_fn_out()
 
 
 if __name__ == '__main__':
