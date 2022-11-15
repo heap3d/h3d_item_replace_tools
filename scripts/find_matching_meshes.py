@@ -7,16 +7,18 @@
 # EMAG
 # find a match between template and target meshes
 # ================================
+
 import copy
 import sys
 import modo
 import modo.constants as c
 import lx
 
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
+from h3d_utils import H3dUtils
+from h3d_debug import H3dDebug
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
 from h3d_kit_constants import *
-from h3d_utils import h3du
-from h3d_debug import h3dd
 from mesh_islands_to_items import is_mesh_similar, DetectOptions
 
 
@@ -50,7 +52,7 @@ def place_center_at_polygons(mesh, polys):
     lx.eval('delete')
     # create locator and align it to work plane grid
     lx.eval('select.type item')
-    tmp_loc = scene.addItem(itype=c.LOCATOR_TYPE)
+    tmp_loc = modo.scene.current().addItem(itype=c.LOCATOR_TYPE)
     tmp_loc.select(replace=True)
     lx.eval('item.matchWorkplane pos')
     lx.eval('item.matchWorkplane rot')
@@ -91,7 +93,7 @@ def get_similar_mesh_center_polys(cur_mesh, cmp_mesh, center_polys):
         return [cur_mesh.geometry.polygons[h3du.get_user_value(USER_VAL_NAME_CENTER_IDX)]]
     for poly in center_polys:
         # duplicate mesh
-        test_mesh = scene.duplicateItem(cur_mesh)
+        test_mesh = modo.scene.current().duplicateItem(cur_mesh)
         test_mesh.name = '{} [{}]'.format(cur_mesh.name, poly.index)
         # select poly
         lx.eval('select.type polygon')
@@ -101,10 +103,10 @@ def get_similar_mesh_center_polys(cur_mesh, cmp_mesh, center_polys):
         place_center_at_polygons(test_mesh, test_polys)
         # test if duplicated mesh similar to template mesh
         if is_mesh_similar(test_mesh, cmp_mesh, detect_options):
-            scene.removeItems(test_mesh)
+            modo.scene.current().removeItems(test_mesh)
             h3dd.print_fn_out()
             return [poly]
-        scene.removeItems(test_mesh)
+        modo.scene.current().removeItems(test_mesh)
     h3dd.print_fn_out()
     return []
 
@@ -122,7 +124,7 @@ def get_similar_mesh_center_polys_Y_axis(cur_mesh, cmp_mesh, center_polys):
         return [cur_mesh.geometry.polygons[h3du.get_user_value(USER_VAL_NAME_CENTER_IDX)]]
     for poly in center_polys:
         # duplicate mesh
-        test_mesh = scene.duplicateItem(cur_mesh)
+        test_mesh = modo.scene.current().duplicateItem(cur_mesh)
         test_mesh.name = '{} [{}]'.format(cur_mesh.name, poly.index)
         # select poly
         lx.eval('select.type polygon')
@@ -140,13 +142,18 @@ def get_similar_mesh_center_polys_Y_axis(cur_mesh, cmp_mesh, center_polys):
         modified_detect_options.do_com_pos.z = False
         # test if duplicated mesh similar to template mesh
         if is_mesh_similar(test_mesh, cmp_mesh, modified_detect_options):
-            scene.removeItems(test_mesh)
+            modo.scene.current().removeItems(test_mesh)
             h3dd.print_fn_out()
             return [poly]
-        scene.removeItems(test_mesh)
+        modo.scene.current().removeItems(test_mesh)
     h3dd.print_fn_out()
     return []
 
+
+h3du = H3dUtils()
+save_log = h3du.get_user_value(USER_VAL_NAME_SAVE_LOG)
+log_name = h3du.replace_file_ext(modo.scene.current().name)
+h3dd = H3dDebug(enable=save_log, file=log_name)
 
 do_bb = modo.mathutils.Vector3()
 do_bb.x = h3du.get_user_value(USER_VAL_NAME_DO_BOUNDING_BOX_X)
@@ -186,5 +193,3 @@ detect_options = DetectOptions(do_bounding_box=do_bb,
                                center_threshold=ctr_thld,
                                com_threshold=com_thld,
                                vol_threshold=vol_thld)
-
-scene = modo.scene.current()

@@ -13,10 +13,12 @@ import modo
 import modo.constants as c
 import lx
 
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
+from h3d_debug import H3dDebug
+from h3d_utils import H3dUtils
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from h3d_debug import h3dd
-from h3d_utils import h3du
 from replace_items_tools import Constraints, item_align
+from h3d_kit_constants import *
 
 
 def main():
@@ -30,7 +32,13 @@ def main():
     if not selected:
         print('None selected')
         return
-    constraints = Constraints()
+    constraints = Constraints(
+        mode=h3du.get_user_value(USER_VAL_NAME_LOCK_XYZ),
+        order=h3du.get_user_value(USER_VAL_NAME_LOCK_XYZ_ORDER),
+        use_x=h3du.get_user_value(USER_VAL_NAME_SCALE_X),
+        use_y=h3du.get_user_value(USER_VAL_NAME_SCALE_Y),
+        use_z=h3du.get_user_value(USER_VAL_NAME_SCALE_Z)
+    )
     # source are last selected item
     source = selected[-1]
     # targets are previous to last
@@ -45,6 +53,11 @@ def main():
     print('done.')
     h3dd.print_fn_out()
 
+
+h3du = H3dUtils()
+save_log = h3du.get_user_value(USER_VAL_NAME_SAVE_LOG)
+log_name = h3du.replace_file_ext(modo.scene.current().name)
+h3dd = H3dDebug(enable=save_log, file=log_name)
 
 if __name__ == '__main__':
     main()

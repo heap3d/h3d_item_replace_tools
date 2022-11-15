@@ -16,7 +16,7 @@ import modo.constants as c
 def main():
     print('start...')
 
-    items = scene.items(itype=c.LOCATOR_TYPE, superType=True)
+    items = modo.scene.current().items(itype=c.LOCATOR_TYPE, superType=True)
     for item in items:
         parent = item.parent
         if parent:
@@ -29,5 +29,4 @@ def main():
 
 
 if __name__ == '__main__':
-    scene = modo.scene.current()
     main()

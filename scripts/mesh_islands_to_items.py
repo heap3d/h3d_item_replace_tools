@@ -14,14 +14,13 @@ import modo
 import modo.constants as c
 import modo.mathutils as mmu
 
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
+from h3d_utils import H3dUtils
+from h3d_debug import H3dDebug
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
 from h3d_kit_constants import *
-from h3d_utils import h3du
-from h3d_debug import h3dd
 from modo_get_mesh_volume_buggy import get_volume
 from get_polygons_operations import get_polygons_find_by_percentage, get_polygons_find_by_largest
-
-DIV_LIT = '-'
 
 
 def get_tmp_name(name):
@@ -64,7 +63,7 @@ def is_bounding_box_intersects(mesh1, mesh2, search_dist, largest_rot, largest_p
     m1_c1, m1_c2 = mesh1.geometry.boundingBox
     m2_c1, m2_c2 = mesh2.geometry.boundingBox
     # create bb1 using searching radius offset
-    bb1 = scene.addMesh('{}_bb1'.format(mesh1.name))
+    bb1 = modo.scene.current().addMesh('{}_bb1'.format(mesh1.name))
     bb1.setParent(mesh1.parent)
     bb1.select(replace=True)
     lx.eval('tool.set prim.cube on')
@@ -80,7 +79,7 @@ def is_bounding_box_intersects(mesh1, mesh2, search_dist, largest_rot, largest_p
     lx.eval('tool.doApply')
     lx.eval('tool.set prim.cube off 0')
     # create bb2 using searching radius offset
-    bb2 = scene.addMesh('{}_bb2'.format(mesh2.name))
+    bb2 = modo.scene.current().addMesh('{}_bb2'.format(mesh2.name))
     bb2.setParent(mesh2.parent)
     bb2.select(replace=True)
     lx.eval('tool.set prim.cube on')
@@ -514,10 +513,10 @@ def is_mesh_equal(cur_mesh, cmp_mesh, options):
 def parent_item_to_item_name(item, group_loc_name):
     h3dd.print_fn_in()
     try:
-        group_loc = scene.item(group_loc_name)
+        group_loc = modo.scene.current().item(group_loc_name)
     except LookupError:
         # create new group_loc if not exist
-        group_loc = scene.addItem(itype=c.GROUPLOCATOR_TYPE, name=group_loc_name)
+        group_loc = modo.scene.current().addItem(itype=c.GROUPLOCATOR_TYPE, name=group_loc_name)
         # parent group_loc to the item.parent
         group_loc.select(replace=True)
         item.parent.select()
@@ -583,7 +582,7 @@ def get_mesh_from_info(store_item):
     mesh_name = lx.eval('item.tag string CMMT ?')
     h3dd.print_debug('mesh <{}>'.format(mesh_name))
     try:
-        mesh_source = scene.item(mesh_name)
+        mesh_source = modo.scene.current().item(mesh_name)
     except LookupError:
         h3dd.print_debug('LookupError')
         h3dd.print_fn_out()
@@ -595,7 +594,7 @@ def get_mesh_from_info(store_item):
 
 def get_group_locators_by_template(template):
     h3dd.print_fn_in()
-    items = scene.items(itype=c.GROUPLOCATOR_TYPE, name='{}*'.format(template))
+    items = modo.scene.current().items(itype=c.GROUPLOCATOR_TYPE, name='{}*'.format(template))
     h3dd.print_items(list(i.name for i in items), message='group locators:')
     h3dd.print_fn_out()
     return items
@@ -803,7 +802,7 @@ def place_center_at_polygons(mesh, polys, largest_rot, largest_pos):
     lx.eval('select.drop polygon')
     lx.eval('workPlane.fitSelect')
     lx.eval('select.type item')
-    tmp_loc = scene.addItem(itype=c.LOCATOR_TYPE)
+    tmp_loc = modo.scene.current().addItem(itype=c.LOCATOR_TYPE)
     tmp_loc.select(replace=True)
     lx.eval('item.matchWorkplane pos')
     lx.eval('item.matchWorkplane rot')
@@ -913,7 +912,7 @@ def set_item_center_normalized(mesh, largest_rot, largest_pos, threshold):
     h3dd.print_debug('polygon_candidates cycle start:')
     for poly in polygon_candidates:
         # duplicate mesh
-        test_mesh = scene.duplicateItem(mesh)
+        test_mesh = modo.scene.current().duplicateItem(mesh)
         test_mesh.name = '{} [{}]'.format(mesh.name, poly.index)
         # select poly
         lx.eval('select.type polygon')
@@ -924,7 +923,7 @@ def set_item_center_normalized(mesh, largest_rot, largest_pos, threshold):
         place_center_at_polygons(mesh=test_mesh, polys=test_polys, largest_rot=largest_rot, largest_pos=largest_pos)
         if is_center_normalized(test_mesh):
             filtered_poly = mesh.geometry.polygons[poly.index]
-        scene.removeItems(test_mesh)
+        modo.scene.current().removeItems(test_mesh)
         if filtered_poly:
             break
 
@@ -935,4 +934,7 @@ def set_item_center_normalized(mesh, largest_rot, largest_pos, threshold):
     h3dd.print_fn_out()
 
 
-scene = modo.scene.current()
+h3du = H3dUtils()
+save_log = h3du.get_user_value(USER_VAL_NAME_SAVE_LOG)
+log_name = h3du.replace_file_ext(modo.scene.current().name)
+h3dd = H3dDebug(enable=save_log, file=log_name)

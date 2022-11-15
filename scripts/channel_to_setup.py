@@ -52,7 +52,7 @@ def get_scale(locator):
 
 
 def main():
-    items = scene.items(itype='locator', superType=True)
+    items = modo.scene.current().items(itype='locator', superType=True)
     for item in items:
         # print(item.name, item)
         # if item.type == 'replicator':
@@ -85,5 +85,4 @@ def main():
 
 
 if __name__ == '__main__':
-    scene = modo.scene.current()
     main()

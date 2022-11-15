@@ -12,9 +12,11 @@ import sys
 import modo
 import lx
 
+sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
+from h3d_utils import H3dUtils
+from h3d_debug import H3dDebug
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
 from h3d_kit_constants import *
-from h3d_utils import h3du
 
 
 def get_size(item):
@@ -59,9 +61,9 @@ def replace_item(item_to_insert, item_to_remove, item_to_remove_new_parent):
 
 def get_tmp_folder(name):
     try:
-        tmp_folder = scene.item(name)
+        tmp_folder = modo.scene.current().item(name)
     except LookupError:
-        tmp_folder = scene.addItem(itype='groupLocator', name=name)
+        tmp_folder = modo.scene.current().addItem(itype='groupLocator', name=name)
         tmp_folder.channel('visible').set('allOff')
         tmp_folder.select(replace=True)
         lx.eval('item.editorColor magenta')
@@ -103,12 +105,12 @@ def item_align(source, target, do_instance, constraints):
     # print('target size:<{}>'.format(target_size))
     if do_instance:
         # print('make instance: do_instance<{}>'.format(do_instance))
-        source_item = scene.duplicateItem(item=source_base, instance=True)
+        source_item = modo.scene.current().duplicateItem(item=source_base, instance=True)
     else:
         # print('do not make instance: do_instance<{}>'.format(do_instance))
         source_item = source
     source_item.setParent()
-    scene.deselect()
+    modo.scene.current().deselect()
     source_item.select()
     target.select()
     lx.eval('item.match item pos average:false item:{} itemTo:{}'.format(source_item.id, target.id))
@@ -168,11 +170,15 @@ def item_align(source, target, do_instance, constraints):
 
 
 class Constraints:
-    mode = h3du.get_user_value(USER_VAL_NAME_LOCK_XYZ)
-    order = h3du.get_user_value(USER_VAL_NAME_LOCK_XYZ_ORDER)
-    use_x = h3du.get_user_value(USER_VAL_NAME_SCALE_X)
-    use_y = h3du.get_user_value(USER_VAL_NAME_SCALE_Y)
-    use_z = h3du.get_user_value(USER_VAL_NAME_SCALE_Z)
+    def __init__(self, mode, order, use_x, use_y, use_z):
+        self.mode = mode
+        self.order = order
+        self.use_x = use_x
+        self.use_y = use_y
+        self.use_z = use_z
 
 
-scene = modo.scene.current()
+h3du = H3dUtils()
+save_log = h3du.get_user_value(USER_VAL_NAME_SAVE_LOG)
+log_name = h3du.replace_file_ext(modo.scene.current().name)
+h3dd = H3dDebug(enable=save_log, file=log_name)
