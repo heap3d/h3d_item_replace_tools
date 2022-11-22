@@ -177,7 +177,7 @@ def get_center_ratios(mesh):
     size = h3du.get_mesh_bounding_box_size(mesh)
     h3dd.print_fn_out()
     # return mm.Vector3(abs(c2[0] / (size.x / 2)), abs(c2[1] / (size.y / 2)), abs(c2[2] / (size.z / 2)))
-    return mmu.Vector3(map(abs, (v2.x * 2 / size.x, v2.y * 2 / size.y, v2.z * 2 / size.z)))
+    return mmu.Vector3(abs(v2.x * 2 / size.x), abs(v2.y * 2 / size.y), abs(v2.z * 2 / size.z))
 
 
 def get_max_ratio(val1, val2):
