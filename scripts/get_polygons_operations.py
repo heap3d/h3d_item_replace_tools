@@ -13,7 +13,7 @@ import lx
 import modo
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
-from h3d_utils import H3dUtils
+import h3d_utils as h3du
 from h3d_debug import H3dDebug
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
 from h3d_kit_constants import *
@@ -103,7 +103,6 @@ def get_polygons_find_by_selected(mesh, selected_polys):
     return selected_polys
 
 
-h3du = H3dUtils()
 save_log = h3du.get_user_value(USER_VAL_NAME_SAVE_LOG)
 log_name = h3du.replace_file_ext(modo.scene.current().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)

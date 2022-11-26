@@ -13,7 +13,7 @@ import modo
 import lx
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
-from h3d_utils import H3dUtils
+import h3d_utils as h3du
 from h3d_debug import H3dDebug
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
 from h3d_kit_constants import *
@@ -86,28 +86,18 @@ def set_item_scale(item, scale):
 
 
 def item_align(source, target, do_instance, constraints):
-    # parent = target.parent
-    # print('target parent:<{}>'.format(parent))
     # get source size
     source_base = h3du.get_source_of_instance(source)
-    # print('source base:<{}>'.format(source_base))
     # get source scale
     sx, sy, sz = get_item_scale(source)
-    # print('source scale:<{}>'.format([sx, sy, sz]))
     # base size
     bx, by, bz = get_size(source_base)
-    # print('base scale:<{}>'.format([bx, by, bz]))
-    # source_size = base_size * source.scale
     source_size = [bx * sx, by * sy, bz * sz]
-    # print('source scale:<{}>'.format(source_size))
     # get target size
     target_size = get_size(target)
-    # print('target size:<{}>'.format(target_size))
     if do_instance:
-        # print('make instance: do_instance<{}>'.format(do_instance))
         source_item = modo.scene.current().duplicateItem(item=source_base, instance=True)
     else:
-        # print('do not make instance: do_instance<{}>'.format(do_instance))
         source_item = source
     source_item.setParent()
     modo.scene.current().deselect()
@@ -165,8 +155,7 @@ def item_align(source, target, do_instance, constraints):
 
     replace_item(item_to_insert=source_item,
                  item_to_remove=target,
-                 item_to_remove_new_parent=get_tmp_folder(TMP_FOLDER_NAME)
-                 )
+                 item_to_remove_new_parent=get_tmp_folder(TMP_FOLDER_NAME))
 
 
 class Constraints:
@@ -178,7 +167,6 @@ class Constraints:
         self.use_z = use_z
 
 
-h3du = H3dUtils()
 save_log = h3du.get_user_value(USER_VAL_NAME_SAVE_LOG)
 log_name = h3du.replace_file_ext(modo.scene.current().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)
