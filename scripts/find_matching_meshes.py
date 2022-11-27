@@ -45,7 +45,7 @@ def place_center_at_polygons(mesh, polys):
     # paste
     lx.eval('paste')
     # triple
-    lx.eval('poly.triple')
+    # lx.eval('poly.triple')
     # work plane fit to selected polygon
     lx.eval('workPlane.fitSelect')
     # delete temporary polygons

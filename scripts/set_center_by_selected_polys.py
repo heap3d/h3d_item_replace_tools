@@ -24,7 +24,6 @@ from get_polygons_operations import get_polygons_find_by_selected
 
 
 def main():
-    # TODO incorrect center detection for selected polygons
     h3dd.print_debug('\n\n----- set_center_by_selected_polys.py -----\n')
     h3dd.print_fn_in()
     print('')

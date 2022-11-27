@@ -10,6 +10,7 @@
 		<source target="h3d_item_replace_tools/scripts/get_polygons_operations.py">scripts/get_polygons_operations.py</source>
 		<source target="h3d_item_replace_tools/scripts/h3d_kit_constants.py">scripts/h3d_kit_constants.py</source>
 		<source target="h3d_item_replace_tools/scripts/hierarchy_fix.py">scripts/hierarchy_fix.py</source>
+		<source target="h3d_item_replace_tools/scripts/item_rotate.py">scripts/item_rotate.py</source>
 		<source target="h3d_item_replace_tools/scripts/log_reset.py">scripts/log_reset.py</source>
 		<source target="h3d_item_replace_tools/scripts/log_toggle.py">scripts/log_toggle.py</source>
 		<source target="h3d_item_replace_tools/scripts/mesh_islands_to_items.py">scripts/mesh_islands_to_items.py</source>
@@ -17,6 +18,8 @@
 		<source target="h3d_item_replace_tools/scripts/modo_polygonCoplanar.py">scripts/modo_polygonCoplanar.py</source>
 		<source target="h3d_item_replace_tools/scripts/replace_by_instance.py">scripts/replace_by_instance.py</source>
 		<source target="h3d_item_replace_tools/scripts/replace_by_item.py">scripts/replace_by_item.py</source>
+		<source target="h3d_item_replace_tools/scripts/replace_by_source.py">scripts/replace_by_source.py</source>
+		<source target="h3d_item_replace_tools/scripts/replace_by_source_instance.py">scripts/replace_by_source_instance.py</source>
 		<source target="h3d_item_replace_tools/scripts/replace_items_tools.py">scripts/replace_items_tools.py</source>
 		<source target="h3d_item_replace_tools/scripts/select_largest_poly.py">scripts/select_largest_poly.py</source>
 		<source target="h3d_item_replace_tools/scripts/select_poly_by_template.py">scripts/select_poly_by_template.py</source>
@@ -24,6 +27,7 @@
 		<source target="h3d_item_replace_tools/scripts/set_center_by_largest_poly.py">scripts/set_center_by_largest_poly.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_by_selected_polys.py">scripts/set_center_by_selected_polys.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_by_template.py">scripts/set_center_by_template.py</source>
+		<source target="h3d_item_replace_tools/scripts/set_source_item.py">scripts/set_source_item.py</source>
 		<source target="h3d_item_replace_tools/scripts/simple_unmerge_mesh.py">scripts/simple_unmerge_mesh.py</source>
 		<source target="h3d_item_replace_tools/scripts/smart_group_meshes.py">scripts/smart_group_meshes.py</source>
 		<source target="h3d_item_replace_tools/scripts/smart_set_center_by_template.py">scripts/smart_set_center_by_template.py</source>
