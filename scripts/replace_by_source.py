@@ -15,7 +15,7 @@ import sys
 
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
 import h3d_utils as h3du
-from h3d_kit_constants import *
+import h3d_kit_constants as h3dc
 
 
 def main():
@@ -28,10 +28,10 @@ def main():
         return
     # add source to selection
     try:
-        source_item = modo.scene.current().item(h3du.get_user_value(USER_VAL_NAME_SOURCE_NAME))
+        source_item = modo.scene.current().item(h3du.get_user_value(h3dc.USER_VAL_NAME_SOURCE_NAME))
     except LookupError:
         modo.dialogs.alert('Replace with Source error:',
-                           '<{}> source item not found.'.format(h3du.get_user_value(USER_VAL_NAME_SOURCE_NAME)))
+                           '<{}> source item not found.'.format(h3du.get_user_value(h3dc.USER_VAL_NAME_SOURCE_NAME)))
         return
     # add source item to selection
     source_item.select()

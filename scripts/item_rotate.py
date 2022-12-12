@@ -17,7 +17,7 @@ import lx
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
 import h3d_utils as h3du
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from h3d_kit_constants import *
+import h3d_kit_constants as h3dc
 
 
 def main():
@@ -25,9 +25,9 @@ def main():
     # get current selection
     selected = modo.scene.current().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
     # get rotation axis
-    rotation_axis = h3du.get_user_value(USER_VAL_NAME_ANGLE_AXIS)
+    rotation_axis = h3du.get_user_value(h3dc.USER_VAL_NAME_ANGLE_AXIS)
     # get rotation angle
-    rotation_angle = h3du.get_user_value(USER_VAL_NAME_ANGLE_STEP)
+    rotation_angle = h3du.get_user_value(h3dc.USER_VAL_NAME_ANGLE_STEP)
     # construct degrees triple
     angle = {'X': 0, 'Y': 0, 'Z': 0}
     angle[rotation_axis] = rotation_angle

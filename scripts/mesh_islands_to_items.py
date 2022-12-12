@@ -18,7 +18,7 @@ sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit
 import h3d_utils as h3du
 from h3d_debug import H3dDebug
 sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-from h3d_kit_constants import *
+import h3d_kit_constants as h3dc
 from modo_get_mesh_volume_buggy import get_volume
 from get_polygons_operations import get_polygons_find_by_percentage, get_polygons_find_by_largest
 
@@ -26,7 +26,7 @@ from get_polygons_operations import get_polygons_find_by_percentage, get_polygon
 def get_tmp_name(name):
     h3dd.print_fn_in()
     h3dd.print_fn_out()
-    return TMP_GRP_NAME_BASE + name
+    return h3dc.TMP_GRP_NAME_BASE + name
 
 
 def simple_unmerge(meshes, largest_rot, largest_pos):
@@ -606,7 +606,7 @@ def group_equal_meshes(meshes, options):
         h3dd.print_fn_out()
         return
     # get similar groups list with unsorted meshes
-    working_similar_groups = get_group_locators_by_template(GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)
+    working_similar_groups = get_group_locators_by_template(h3dc.GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)
     h3dd.print_items(list(i.name for i in working_similar_groups), message='initial working_similar_groups:')
     h3dd.print_debug('working_similar_groups cycle start:')
     h3dd.indent_inc()
@@ -615,12 +615,12 @@ def group_equal_meshes(meshes, options):
         h3dd.print_debug('working_similar_groups cycle next iteration:')
         equal_groups = similar_group.children(itemType=c.GROUPLOCATOR_TYPE)
         h3dd.print_items(equal_groups, message='initial equal groups:')
-        similar_group_num = name_sfx2num(similar_group.name, GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)
+        similar_group_num = name_sfx2num(similar_group.name, h3dc.GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)
         type_nums = list(
             name_sfx2num(group.name, '{}{}{}'.format(
-                GEO_SHAPE_EQUAL_TYPE_NAME_BASE,
+                h3dc.GEO_SHAPE_EQUAL_TYPE_NAME_BASE,
                 num2name_sfx(similar_group_num),
-                DIV_LIT))
+                h3dc.DIV_LIT))
             for group in equal_groups)
         if type_nums:
             max_type_num = max(type_nums)
@@ -640,9 +640,9 @@ def group_equal_meshes(meshes, options):
             # create new equal type group
             max_type_num += 1
             new_equal_group = parent_item_to_item_name(similar_mesh, '{}{}{}{}'.format(
-                GEO_SHAPE_EQUAL_TYPE_NAME_BASE,
-                num2name_sfx(name_sfx2num(similar_group.name, GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)),
-                DIV_LIT,
+                h3dc.GEO_SHAPE_EQUAL_TYPE_NAME_BASE,
+                num2name_sfx(name_sfx2num(similar_group.name, h3dc.GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)),
+                h3dc.DIV_LIT,
                 num2name_sfx(max_type_num)
             ))
             # add new equal group to equal_groups
@@ -660,8 +660,8 @@ def group_similar_items(meshes, options):
         h3dd.print_fn_out()
         return
     # get similar type group locators list
-    similar_groups = get_group_locators_by_template(GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)
-    type_nums = list(name_sfx2num(group.name, GEO_SHAPE_SIMILAR_TYPE_NAME_BASE) for group in similar_groups)
+    similar_groups = get_group_locators_by_template(h3dc.GEO_SHAPE_SIMILAR_TYPE_NAME_BASE)
+    type_nums = list(name_sfx2num(group.name, h3dc.GEO_SHAPE_SIMILAR_TYPE_NAME_BASE) for group in similar_groups)
     h3dd.print_items(list(i.name for i in similar_groups), message='initial similar_groups:')
     h3dd.print_items(type_nums, message='type_nums:')
     if type_nums:
@@ -701,7 +701,7 @@ def group_similar_items(meshes, options):
         h3dd.print_debug('max_type_num <{}>'.format(max_type_num))
         new_similar_type_group = parent_item_to_item_name(
             mesh,
-            '{}{}'.format(GEO_SHAPE_SIMILAR_TYPE_NAME_BASE, num2name_sfx(max_type_num))
+            '{}{}'.format(h3dc.GEO_SHAPE_SIMILAR_TYPE_NAME_BASE, num2name_sfx(max_type_num))
         )
         # add new_similar_type_group to the similar_groups
         similar_groups.append(new_similar_type_group)
@@ -934,6 +934,6 @@ def set_item_center_normalized(mesh, largest_rot, largest_pos, threshold):
     h3dd.print_fn_out()
 
 
-save_log = h3du.get_user_value(USER_VAL_NAME_SAVE_LOG)
+save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
 log_name = h3du.replace_file_ext(modo.scene.current().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)
