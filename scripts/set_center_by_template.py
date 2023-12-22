@@ -8,19 +8,17 @@
 # set item center for the selected meshes by matching to template
 # ================================
 
-import sys
 import modo
 import modo.constants as c
 import lx
 import uuid
 
-sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
-import h3d_utils as h3du
-from h3d_debug import H3dDebug
-sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-import h3d_kit_constants as h3dc
-from find_matching_meshes import get_similar_mesh_center_polys, place_center_at_polygons
-from get_polygons_operations import get_polygons_find_by_percentage
+from h3d_utilites.scripts.h3d_debug import H3dDebug
+import h3d_utilites.scripts.h3d_utils as h3du
+
+import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
+from h3d_item_replace_tools.scripts.find_matching_meshes import get_similar_mesh_center_polys, place_center_at_polygons
+from h3d_item_replace_tools.scripts.get_polygons_operations import get_polygons_find_by_percentage
 
 
 def main():

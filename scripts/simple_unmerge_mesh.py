@@ -12,17 +12,20 @@
 # grouping equal meshes
 # ================================
 
-import sys
-import lx
 import modo
 import modo.constants as c
 
-sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_utilites:}')))
-import h3d_utils as h3du
-from h3d_debug import H3dDebug
-sys.path.append('{}\\scripts'.format(lx.eval('query platformservice alias ? {kit_h3d_item_replace_tools:}')))
-import h3d_kit_constants as h3dc
-from mesh_islands_to_items import get_tmp_name, simple_unmerge, group_similar_items, group_equal_meshes, DetectOptions
+from h3d_utilites.scripts.h3d_debug import H3dDebug
+import h3d_utilites.scripts.h3d_utils as h3du
+
+import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
+from h3d_item_replace_tools.scripts.mesh_islands_to_items import (
+    get_tmp_name,
+    simple_unmerge,
+    group_similar_items,
+    group_equal_meshes,
+    DetectOptions
+)
 
 
 def main():
