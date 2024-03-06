@@ -64,7 +64,7 @@ def is_bounding_box_intersects(mesh1, mesh2, search_dist, largest_rot, largest_p
     m1_c1, m1_c2 = mesh1.geometry.boundingBox
     m2_c1, m2_c2 = mesh2.geometry.boundingBox
     # create bb1 using searching radius offset
-    bb1 = modo.scene.current().addMesh("{}_bb1".format(mesh1.name))
+    bb1 = modo.Scene().addMesh("{}_bb1".format(mesh1.name))
     bb1.setParent(mesh1.parent)
     bb1.select(replace=True)
     lx.eval("tool.set prim.cube on")
@@ -80,7 +80,7 @@ def is_bounding_box_intersects(mesh1, mesh2, search_dist, largest_rot, largest_p
     lx.eval("tool.doApply")
     lx.eval("tool.set prim.cube off 0")
     # create bb2 using searching radius offset
-    bb2 = modo.scene.current().addMesh("{}_bb2".format(mesh2.name))
+    bb2 = modo.Scene().addMesh("{}_bb2".format(mesh2.name))
     bb2.setParent(mesh2.parent)
     bb2.select(replace=True)
     lx.eval("tool.set prim.cube on")
@@ -126,7 +126,7 @@ def is_bounding_box_intersects(mesh1, mesh2, search_dist, largest_rot, largest_p
     bb2.select()
     lx.eval("poly.boolean intersect lastselect {} false")
     # check if any polygons remain, store result in intersected variable
-    is_intersected = len(bb1.geometry.polygons) > 0
+    is_intersected = len(bb1.geometry.polygons) > 0  # type: ignore
     # remove bounding box meshes
     bb1.select(replace=True)
     bb2.select()
@@ -304,10 +304,10 @@ def is_equal_center_of_mass_pos(cur_mesh, cmp_mesh, threshold, options):
 def is_equal_mesh_volume(cur_mesh, cmp_mesh, threshold):
     h3dd.print_fn_in()
     cur_vol = get_volume(cur_mesh, com=False)
-    cur_vol_cube_root = cur_vol ** (1.0 / 3)
+    cur_vol_cube_root = cur_vol ** (1.0 / 3)  # type: ignore
 
     cmp_vol = get_volume(cmp_mesh, com=False)
-    cmp_vol_cube_root = cmp_vol ** (1.0 / 3)
+    cmp_vol_cube_root = cmp_vol ** (1.0 / 3)  # type: ignore
 
     if not is_valid_ratio(cur_vol_cube_root, cmp_vol_cube_root, threshold):
         h3dd.print_fn_out()
@@ -349,12 +349,12 @@ def is_similar_center_pos(cur_mesh, cmp_mesh, threshold, options):
     # check center position
     cur_info_str = h3du.get_mesh_debug_info(cur_mesh)
     curr_center_ratio = get_center_ratios(cur_mesh)
-    cur_info_str += "center ratio <{}>\n".format(curr_center_ratio)
+    cur_info_str += "center ratio <{}>\n".format(curr_center_ratio)  # type: ignore
     h3du.set_mesh_debug_info(cur_mesh, cur_info_str)
 
     cmp_info_str = h3du.get_mesh_debug_info(cmp_mesh)
     comp_center_ratio = get_center_ratios(cmp_mesh)
-    cmp_info_str += "center ratio <{}>\n".format(comp_center_ratio)
+    cmp_info_str += "center ratio <{}>\n".format(comp_center_ratio)  # type: ignore
     h3du.set_mesh_debug_info(cmp_mesh, cmp_info_str)
 
     if options.do_center_pos.x:
@@ -389,7 +389,7 @@ def is_similar_center_of_mass_pos(cur_mesh, cmp_mesh, threshold, options):
     )
     cur_info_str = h3du.get_mesh_debug_info(cur_mesh)
     cur_info_str += "bb <{}>\ncom <{}> com size <{}>\ncom ratio <{}>\n".format(
-        list(cur_bb), list(cur_com), list(cur_com_size), list(cur_com_ratio)
+        list(cur_bb), list(cur_com), list(cur_com_size), list(cur_com_ratio)  # type: ignore
     )
     h3du.set_mesh_debug_info(cur_mesh, cur_info_str)
 
@@ -405,7 +405,7 @@ def is_similar_center_of_mass_pos(cur_mesh, cmp_mesh, threshold, options):
     )
     cmp_info_str = h3du.get_mesh_debug_info(cmp_mesh)
     cmp_info_str += "bb <{}>\ncom <{}> com size <{}>\ncom ratio <{}>\n".format(
-        list(cmp_bb), list(cmp_com), list(cmp_com_size), list(cmp_com_ratio)
+        list(cmp_bb), list(cmp_com), list(cmp_com_size), list(cmp_com_ratio)  # type: ignore
     )
     h3du.set_mesh_debug_info(cmp_mesh, cmp_info_str)
 
@@ -432,24 +432,24 @@ def is_similar_mesh_volume(cur_mesh, cmp_mesh, threshold):
     cur_size = h3du.get_mesh_bounding_box_size(cur_mesh)
     cur_bb_vol = cur_size.x * cur_size.y * cur_size.z
     cur_vol = get_volume(cur_mesh, com=False)
-    cur_vol_cube_root = cur_vol ** (1.0 / 3)
+    cur_vol_cube_root = cur_vol ** (1.0 / 3)  # type: ignore
     cur_bb_vol_cube_root = cur_bb_vol ** (1.0 / 3)
     cur_vol_root_ratio = cur_vol_cube_root / cur_bb_vol_cube_root
     cur_info_str = h3du.get_mesh_debug_info(cur_mesh)
     cur_info_str += "vol <{}> bb_vol <{}>\nroot ratio <{}>/<{}>=<{}>\n".format(
-        cur_vol, cur_bb_vol, cur_vol_cube_root, cur_bb_vol_cube_root, cur_vol_root_ratio
+        cur_vol, cur_bb_vol, cur_vol_cube_root, cur_bb_vol_cube_root, cur_vol_root_ratio  # type: ignore
     )
     h3du.set_mesh_debug_info(cur_mesh, cur_info_str)
 
     cmp_size = h3du.get_mesh_bounding_box_size(cmp_mesh)
     cmp_bb_vol = cmp_size.x * cmp_size.y * cmp_size.z
     cmp_vol = get_volume(cmp_mesh, com=False)
-    cmp_vol_cube_root = cmp_vol ** (1.0 / 3)
+    cmp_vol_cube_root = cmp_vol ** (1.0 / 3)  # type: ignore
     cmp_bb_vol_cube_root = cmp_bb_vol ** (1.0 / 3)
     cmp_vol_root_ratio = cmp_vol_cube_root / cmp_bb_vol_cube_root
     cmp_info_str = h3du.get_mesh_debug_info(cmp_mesh)
     cmp_info_str += "vol <{}> bb_vol <{}>\nroots ratio <{}>/<{}>=<{}>\n".format(
-        cmp_vol, cmp_bb_vol, cmp_vol_cube_root, cmp_bb_vol_cube_root, cmp_vol_root_ratio
+        cmp_vol, cmp_bb_vol, cmp_vol_cube_root, cmp_bb_vol_cube_root, cmp_vol_root_ratio  # type: ignore
     )
     h3du.set_mesh_debug_info(cmp_mesh, cmp_info_str)
 
@@ -582,10 +582,10 @@ def is_mesh_equal(cur_mesh, cmp_mesh, options):
 def parent_item_to_item_name(item, group_loc_name):
     h3dd.print_fn_in()
     try:
-        group_loc = modo.scene.current().item(group_loc_name)
+        group_loc = modo.Scene().item(group_loc_name)
     except LookupError:
         # create new group_loc if not exist
-        group_loc = modo.scene.current().addItem(
+        group_loc = modo.Scene().addItem(
             itype=c.GROUPLOCATOR_TYPE, name=group_loc_name
         )
         # parent group_loc to the item.parent
@@ -655,7 +655,7 @@ def get_mesh_from_info(store_item):
     mesh_name = lx.eval("item.tag string CMMT ?")
     h3dd.print_debug("mesh <{}>".format(mesh_name))
     try:
-        mesh_source = modo.scene.current().item(mesh_name)
+        mesh_source = modo.Scene().item(mesh_name)
     except LookupError:
         h3dd.print_debug("LookupError")
         h3dd.print_fn_out()
@@ -667,7 +667,7 @@ def get_mesh_from_info(store_item):
 
 def get_group_locators_by_template(template):
     h3dd.print_fn_in()
-    items = modo.scene.current().items(
+    items = modo.Scene().items(
         itype=c.GROUPLOCATOR_TYPE, name="{}*".format(template)
     )
     h3dd.print_items(list(i.name for i in items), message="group locators:")
@@ -710,7 +710,7 @@ def group_equal_meshes(meshes, options):
             for group in equal_groups
         )
         if type_nums:
-            max_type_num = max(type_nums)
+            max_type_num = max(type_nums)  # type: ignore
         else:
             max_type_num = 0
         similar_meshes = similar_group.children(itemType=c.MESH_TYPE)
@@ -766,7 +766,7 @@ def group_similar_items(meshes, options):
     )
     h3dd.print_items(type_nums, message="type_nums:")
     if type_nums:
-        max_type_num = max(type_nums)
+        max_type_num = max(type_nums)  # type: ignore
     else:
         max_type_num = 0
     h3dd.print_debug("max_type_num <{}>".format(max_type_num))
@@ -921,7 +921,7 @@ def place_center_at_polygons(mesh, polys, largest_rot, largest_pos):
     lx.eval("select.drop polygon")
     lx.eval("workPlane.fitSelect")
     lx.eval("select.type item")
-    tmp_loc = modo.scene.current().addItem(itype=c.LOCATOR_TYPE)
+    tmp_loc = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
     tmp_loc.select(replace=True)
     lx.eval("item.matchWorkplane pos")
     lx.eval("item.matchWorkplane rot")
@@ -1040,12 +1040,12 @@ def set_item_center_normalized(mesh, largest_rot, largest_pos, threshold):
     h3dd.print_debug("polygon_candidates cycle start:")
     for poly in polygon_candidates:
         # duplicate mesh
-        test_mesh = modo.scene.current().duplicateItem(mesh)
-        test_mesh.name = "{} [{}]".format(mesh.name, poly.index)
+        test_mesh = modo.Scene().duplicateItem(mesh)
+        test_mesh.name = "{} [{}]".format(mesh.name, poly.index)  # type: ignore
         # select poly
         lx.eval("select.type polygon")
         lx.eval("select.drop polygon")
-        test_polys = [(test_mesh.geometry.polygons[poly.index])]
+        test_polys = [(test_mesh.geometry.polygons[poly.index])]  # type: ignore
         h3dd.print_items(test_polys, "test_polys:")
         # set center to selected poly
         place_center_at_polygons(
@@ -1056,7 +1056,7 @@ def set_item_center_normalized(mesh, largest_rot, largest_pos, threshold):
         )
         if is_center_normalized(test_mesh):
             filtered_poly = mesh.geometry.polygons[poly.index]
-        modo.scene.current().removeItems(test_mesh)
+        modo.Scene().removeItems(test_mesh)
         if filtered_poly:
             break
 
@@ -1070,5 +1070,5 @@ def set_item_center_normalized(mesh, largest_rot, largest_pos, threshold):
 
 
 save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
-log_name = h3du.replace_file_ext(modo.scene.current().name)
+log_name = h3du.replace_file_ext(modo.Scene().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)

@@ -34,7 +34,7 @@ def main():
     print('')
     print('start simple_unmerge_mesh.py...')
 
-    scene = modo.scene.current()
+    scene = modo.Scene()
     largest_rot = h3du.get_user_value(h3dc.USER_VAL_NAME_LARGEST_ROT)
     largest_pos = h3du.get_user_value(h3dc.USER_VAL_NAME_LARGEST_POS)
     do_group_similar = h3du.get_user_value(h3dc.USER_VAL_NAME_GROUP_SIMILAR)
@@ -99,7 +99,7 @@ def main():
 
     # select processed meshes
     scene.deselect()
-    for item in todo_meshes:
+    for item in todo_meshes:  # type: ignore
         item.select()
 
     print('done.')
@@ -107,7 +107,7 @@ def main():
 
 
 save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
-log_name = h3du.replace_file_ext(modo.scene.current().name)
+log_name = h3du.replace_file_ext(modo.Scene().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)
 
 if __name__ == '__main__':

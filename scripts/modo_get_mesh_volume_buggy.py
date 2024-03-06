@@ -47,10 +47,10 @@ def get_volume(mesh, com=False):
     surf_monitor = 'Modified by Dmytro Holub, comment this line and uncomment all others to restore original'
     soup = TriSoup(surf_monitor)
     samp = lx.object.TableauSurface()
-    surf_bincount = surf.BinCount()
+    surf_bincount = surf.BinCount()  # type: ignore
     # surf_monitor.Initialize(surf.GLCount())
     for x in range(surf_bincount):
-        samp.set(surf.BinByIndex(x))
+        samp.set(surf.BinByIndex(x))  # type: ignore
         soup.Sample(samp)
         # surf_monitor.Increment(1)
     # dialog_svc.MonitorRelease()
@@ -85,7 +85,7 @@ class TriSoup(lxifc.TriangleSoup):
         # self.mon = lx.object.Monitor(mon)
         self.output = []
         self.vdesc = lx.service.Tableau().AllocVertex()
-        self.vdesc.AddFeature(lx.symbol.iTBLX_BASEFEATURE, lx.symbol.sTBLX_FEATURE_POS)
+        self.vdesc.AddFeature(lx.symbol.iTBLX_BASEFEATURE, lx.symbol.sTBLX_FEATURE_POS)  # type: ignore
 
     def Sample(self, surf):
         surf.SetVertex(self.vdesc)
@@ -105,8 +105,8 @@ class TriSoup(lxifc.TriangleSoup):
 
     def soup_Polygon(self, v0, v1, v2):
         # process the next polygon
-        x0 = lxu.vector.sub(self.vrts[v1], self.vrts[v0])
-        x1 = lxu.vector.sub(self.vrts[v2], self.vrts[v0])
+        x0 = lxu.vector.sub(self.vrts[v1], self.vrts[v0])  # type: ignore
+        x1 = lxu.vector.sub(self.vrts[v2], self.vrts[v0])  # type: ignore
 
         p0x, p0y, p0z = self.vrts[v0]
         p1x, p1y, p1z = self.vrts[v1]

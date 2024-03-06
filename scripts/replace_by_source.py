@@ -21,13 +21,13 @@ def main():
     print('')
     print('replace_by_source.py start...')
 
-    selection = modo.scene.current().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+    selection = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
     if not selection:
         modo.dialogs.alert('Replace with Source error:', 'No items selected.')
         return
     # add source to selection
     try:
-        source_item = modo.scene.current().item(h3du.get_user_value(h3dc.USER_VAL_NAME_SOURCE_NAME))
+        source_item = modo.Scene().item(h3du.get_user_value(h3dc.USER_VAL_NAME_SOURCE_NAME))
     except LookupError:
         modo.dialogs.alert('Replace with Source error:',
                            '<{}> source item not found.'.format(h3du.get_user_value(h3dc.USER_VAL_NAME_SOURCE_NAME)))

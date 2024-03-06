@@ -15,22 +15,17 @@ import lx
 
 from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
-import h3d_kit_constants as h3dc
+import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
 
 
 def get_selected_mesh():
     h3dd.print_fn_in()
-    selected = modo.scene.current().selectedByType(itype=c.MESH_TYPE)
+    selected = modo.Scene().selectedByType(itype=c.MESH_TYPE)
     h3dd.print_fn_out()
     return selected[:1]
 
 
 def main():
-    h3dd.print_debug('\n\n----- get_mesh_template_stats.py -----\n')
-    h3dd.print_fn_in()
-    print('')
-    print('start...')
-
     selected_mesh = get_selected_mesh()
     for test_mesh in selected_mesh[:1]:
         h3du.set_user_value(h3dc.USER_VAL_NAME_TEMPLATE_MESH, test_mesh.name)
@@ -47,13 +42,19 @@ def main():
         h3du.set_user_value(h3dc.USER_VAL_NAME_CENTER_AREA_PERC, percentage)
         lx.eval('@{scripts/set_center_by_selected_polys.py}')
 
-    print('done.')
     h3dd.print_fn_out()
 
 
 save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
-log_name = h3du.replace_file_ext(modo.scene.current().name)
+log_name = h3du.replace_file_ext(modo.Scene().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)
 
 if __name__ == '__main__':
+    h3dd.print_debug('\n\n----- get_mesh_template_stats.py -----\n')
+    h3dd.print_fn_in()
+    print('')
+    print('start...')
+
     main()
+
+    print('done.')

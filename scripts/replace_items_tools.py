@@ -22,7 +22,7 @@ def get_size(item):
         return [0.0, 0.0, 0.0]
     s_x, s_y, s_z = get_item_scale(item)
     if item.type == 'meshInst':
-        corners = h3du.get_source_of_instance(item).geometry.boundingBox
+        corners = h3du.get_source_of_instance(item).geometry.boundingBox  # type: ignore
     else:
         corners = item.geometry.boundingBox
     size_x = abs(corners[1][0] - corners[0][0]) * s_x
@@ -59,10 +59,10 @@ def replace_item(item_to_insert, item_to_remove, item_to_remove_new_parent):
 
 def get_tmp_folder(name):
     try:
-        tmp_folder = modo.scene.current().item(name)
+        tmp_folder = modo.Scene().item(name)
     except LookupError:
-        tmp_folder = modo.scene.current().addItem(itype='groupLocator', name=name)
-        tmp_folder.channel('visible').set('allOff')
+        tmp_folder = modo.Scene().addItem(itype='groupLocator', name=name)
+        tmp_folder.channel('visible').set('allOff')  # type: ignore
         tmp_folder.select(replace=True)
         lx.eval('item.editorColor magenta')
     return tmp_folder
@@ -90,26 +90,26 @@ def item_align(source, target, do_instance, constraints):
     sx, sy, sz = get_item_scale(source)
     # base size
     bx, by, bz = get_size(source_base)
-    source_size = [bx * sx, by * sy, bz * sz]
+    source_size = [bx * sx, by * sy, bz * sz]  # type: ignore
     # get target size
     target_size = get_size(target)
     if do_instance:
-        source_item = modo.scene.current().duplicateItem(item=source_base, instance=True)
+        source_item = modo.Scene().duplicateItem(item=source_base, instance=True)
     else:
         source_item = source
-    source_item.setParent()
-    modo.scene.current().deselect()
-    source_item.select()
+    source_item.setParent()  # type: ignore
+    modo.Scene().deselect()
+    source_item.select()  # type: ignore
     target.select()
-    lx.eval('item.match item pos average:false item:{} itemTo:{}'.format(source_item.id, target.id))
-    lx.eval('item.match item rot average:false item:{} itemTo:{}'.format(source_item.id, target.id))
+    lx.eval('item.match item pos average:false item:{} itemTo:{}'.format(source_item.id, target.id))  # type: ignore
+    lx.eval('item.match item rot average:false item:{} itemTo:{}'.format(source_item.id, target.id))  # type: ignore
     if do_instance:
         # initiate scale on instance
-        source_item.select(replace=True)
-        source_base.select()
+        source_item.select(replace=True)  # type: ignore
+        source_base.select()  # type: ignore
         lx.eval('item.match item scl')
     # initiate visibility on instance
-    source_item.select(replace=True)
+    source_item.select(replace=True)  # type: ignore
     lx.eval('item.channel locator$visible default')
     # check if there are any 0.0 in source_size or target_size
     if any([f == 0.0 for f in (source_size + target_size)]):
@@ -166,5 +166,5 @@ class Constraints:
 
 
 save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
-log_name = h3du.replace_file_ext(modo.scene.current().name)
+log_name = h3du.replace_file_ext(modo.Scene().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)

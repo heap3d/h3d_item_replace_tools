@@ -20,7 +20,7 @@ import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
 def main():
     print('item_rotate.py: start...')
     # get current selection
-    selected = modo.scene.current().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+    selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
     # get rotation axis
     rotation_axis = h3du.get_user_value(h3dc.USER_VAL_NAME_ANGLE_AXIS)
     # get rotation angle

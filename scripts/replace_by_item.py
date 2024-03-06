@@ -24,7 +24,7 @@ def main():
     print('')
     print('start...')
 
-    scene = modo.scene.current()
+    scene = modo.Scene()
     selected = scene.selectedByType(c.LOCATOR_TYPE, superType=True)
     if not selected:
         print('None selected')
@@ -52,7 +52,7 @@ def main():
 
 
 save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
-log_name = h3du.replace_file_ext(modo.scene.current().name)
+log_name = h3du.replace_file_ext(modo.Scene().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)
 
 if __name__ == '__main__':

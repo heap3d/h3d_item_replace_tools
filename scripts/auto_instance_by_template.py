@@ -16,7 +16,7 @@ import modo.constants as c
 
 
 def main():
-    if not modo.scene.current().selectedByType(itype=c.MESH_TYPE):
+    if not modo.Scene().selectedByType(itype=c.MESH_TYPE):
         print('No mesh items selected')
         return
     # Smart Set Item Center by Template

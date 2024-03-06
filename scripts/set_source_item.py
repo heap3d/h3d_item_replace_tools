@@ -20,7 +20,7 @@ def main():
     print('')
     print('set_source_item.py start...')
 
-    selected = modo.scene.current().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+    selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
     if not selected:
         modo.dialogs.alert('Set as Source error:', 'No item selected.')
         return
