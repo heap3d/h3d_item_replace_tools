@@ -30,52 +30,67 @@ def place_center_at_polygons(mesh, polys, do_poly_triple):
         return
 
     parent = mesh.parent
+    hierarchy_index = mesh.parentIndex if parent else mesh.rootIndex
     mesh.select(replace=True)
     lx.eval('item.editorColor darkgrey')
+
     # select center polygons
     lx.eval('select.type polygon')
     lx.eval('select.drop polygon')
     for poly in polys:
         poly.select()
+
     # create temporary polygons to correctly determine the center of the selection
     # enable select on paste
 
     # copy
     lx.eval('copy')
+
     # paste
     lx.eval('paste')
+
     # triple
     if do_poly_triple:
         lx.eval('poly.triple')
+
     # work plane fit to selected polygon
     lx.eval('workPlane.fitSelect')
+
     # delete temporary polygons
     lx.eval('delete')
+
     # create locator and align it to work plane grid
     lx.eval('select.type item')
     tmp_loc = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
     tmp_loc.select(replace=True)
     lx.eval('item.matchWorkplane pos')
     lx.eval('item.matchWorkplane rot')
+
     # rotate locator 180 degrees around Z axis
     rot_x, rot_y, rot_z = tmp_loc.rotation.get(degrees=True)
     tmp_loc.rotation.set((rot_x, rot_y, rot_z + 180.0), degrees=True)
+
     # parent mesh to locator in place
     mesh.select(replace=True)
     tmp_loc.select()
     lx.eval('item.parent inPlace:1')
+
     # freeze transforms to reset center of the selected mesh
     mesh.select(replace=True)
     lx.eval('transform.freeze')
+
     # unparent in place
-    lx.eval('item.parent parent:{{}} inPlace:1')
+    lx.eval(f'item.parent parent:{{}} inPlace:1 position:{hierarchy_index}')
+
     # restore parenting
     if parent is not None:
         parent.select()
-        lx.eval('item.parent inPlace:1')
+        lx.eval(f'item.parent inPlace:1 position:{hierarchy_index}')
+
     # delete locator
     tmp_loc.select(replace=True)
     lx.eval('item.delete')
+
     # reset work plane
     lx.eval('workPlane.reset')
     h3dd.print_fn_out()
@@ -96,12 +111,15 @@ def get_similar_mesh_center_polys(cur_mesh, cmp_mesh, center_polys, do_poly_trip
         # duplicate mesh
         test_mesh = modo.Scene().duplicateItem(cur_mesh)
         test_mesh.name = '{} [{}]'.format(cur_mesh.name, poly.index)  # type: ignore
+
         # select poly
         lx.eval('select.type polygon')
         lx.eval('select.drop polygon')
         test_polys = [(test_mesh.geometry.polygons[poly.index])]  # type: ignore
+
         # set center to selected poly
         place_center_at_polygons(test_mesh, test_polys, do_poly_triple)
+
         # test if duplicated mesh similar to template mesh
         if is_mesh_similar(test_mesh, cmp_mesh, detect_options):
             modo.Scene().removeItems(test_mesh)
@@ -127,12 +145,15 @@ def get_similar_mesh_center_polys_Y_axis(cur_mesh, cmp_mesh, center_polys, do_po
         # duplicate mesh
         test_mesh = modo.Scene().duplicateItem(cur_mesh)
         test_mesh.name = '{} [{}]'.format(cur_mesh.name, poly.index)  # type: ignore
+
         # select poly
         lx.eval('select.type polygon')
         lx.eval('select.drop polygon')
         test_polys = [(test_mesh.geometry.polygons[poly.index])]  # type: ignore
+
         # set center to selected poly
         place_center_at_polygons(test_mesh, test_polys, do_poly_triple)
+
         # modify detect options to using Y axis only
         modified_detect_options = copy.copy(detect_options)
         modified_detect_options.do_bounding_box.x = False
@@ -141,6 +162,7 @@ def get_similar_mesh_center_polys_Y_axis(cur_mesh, cmp_mesh, center_polys, do_po
         modified_detect_options.do_center_pos.z = False
         modified_detect_options.do_com_pos.x = False
         modified_detect_options.do_com_pos.z = False
+
         # test if duplicated mesh similar to template mesh
         if is_mesh_similar(test_mesh, cmp_mesh, modified_detect_options):
             modo.Scene().removeItems(test_mesh)
