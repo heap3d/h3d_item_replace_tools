@@ -31,23 +31,27 @@ def main():
     do_poly_triple = h3du.get_user_value(h3dc.USER_VAL_NAME_POLY_TRIPLE)
     selected_meshes = scene.selectedByType(itype=c.MESH_TYPE)
     set_uuid = str(uuid.uuid4())
-    selection_set_name = '{} - {}'.format(h3dc.SELECTION_SET_BASE_NAME, set_uuid)
+    items_selection_set_name = '{} - {}'.format(h3dc.SELECTION_SET_BASE_NAME, set_uuid)
     selected_polys = {mesh.id: mesh.geometry.polygons.selected for mesh in selected_meshes}
 
     for mesh in selected_meshes:
         center_polys = get_polygons_find_by_selected(mesh, selected_polys[mesh.id])
+
         # skip if mesh doesn't matches to template (returned index is -1)
         if not center_polys:
             continue
+
         # enter item mode and add matched mesh to selection set
         lx.eval('select.type item')
-        lx.eval('select.editSet {{{}}} add item:{}'.format(selection_set_name, mesh.id))
+        lx.eval('select.editSet {{{}}} add item:{}'.format(items_selection_set_name, mesh.id))
 
+        # TODO triple multigons
         place_center_at_polygons(mesh, center_polys, do_poly_triple)
+        # TODO restore multigons
 
     # select processed meshes
     try:
-        lx.eval('!select.useSet "{}" replace'.format(selection_set_name))
+        lx.eval('!select.useSet "{}" replace'.format(items_selection_set_name))
     except RuntimeError:
         print('No meshes were processed.')
         print('Try to update template mesh info')

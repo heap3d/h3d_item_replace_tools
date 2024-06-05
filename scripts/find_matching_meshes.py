@@ -20,6 +20,9 @@ import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
 from h3d_item_replace_tools.scripts.mesh_islands_to_items import is_mesh_similar, DetectOptions
 
 
+COLOR_PROCESSED = 'orange'
+
+
 def place_center_at_polygons(mesh, polys, do_poly_triple):
     h3dd.print_fn_in()
     if not mesh:
@@ -32,7 +35,7 @@ def place_center_at_polygons(mesh, polys, do_poly_triple):
     parent = mesh.parent
     hierarchy_index = mesh.parentIndex if parent else mesh.rootIndex
     mesh.select(replace=True)
-    lx.eval('item.editorColor darkgrey')
+    lx.eval(f'item.editorColor {COLOR_PROCESSED}')
 
     # select center polygons
     lx.eval('select.type polygon')
