@@ -9,11 +9,17 @@
 # ================================
 
 import modo
+import lx
 
 import h3d_utilites.scripts.h3d_utils as h3du
 from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
+
+
+def remove_item_selection_set(name: str) -> None:
+    lx.eval(f'select.pickWorkingSet "{name}"')
+    lx.eval('select.deleteWorkingSet')
 
 
 def get_margin_low(percentage, threshold):

@@ -17,7 +17,10 @@ from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
-from h3d_item_replace_tools.scripts.get_polygons_operations import get_polygons_find_by_largest
+from h3d_item_replace_tools.scripts.get_polygons_operations import (
+    get_polygons_find_by_largest,
+    remove_item_selection_set,
+)
 
 
 def main():
@@ -48,6 +51,7 @@ def main():
     # select processed meshes
     try:
         lx.eval('!select.useSet "{}" replace'.format(selection_set_name))
+        remove_item_selection_set(selection_set_name)
     except RuntimeError:
         print('No meshes were processed.')
         print('Try to update template mesh info')
