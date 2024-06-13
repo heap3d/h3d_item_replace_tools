@@ -20,9 +20,11 @@
 		<source target="h3d_item_replace_tools/scripts/replace_by_source_instance.py">scripts/replace_by_source_instance.py</source>
 		<source target="h3d_item_replace_tools/scripts/replace_items_tools.py">scripts/replace_items_tools.py</source>
 		<source target="h3d_item_replace_tools/scripts/select_largest_poly.py">scripts/select_largest_poly.py</source>
+		<source target="h3d_item_replace_tools/scripts/select_most_vertices_poly.py">scripts/select_most_vertices_poly.py</source>
 		<source target="h3d_item_replace_tools/scripts/select_poly_by_template.py">scripts/select_poly_by_template.py</source>
 		<source target="h3d_item_replace_tools/scripts/select_poly_by_template_Y_axis.py">scripts/select_poly_by_template_Y_axis.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_by_largest_poly.py">scripts/set_center_by_largest_poly.py</source>
+		<source target="h3d_item_replace_tools/scripts/set_center_by_most_vertices_poly.py">scripts/set_center_by_most_vertices_poly.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_by_selected_polys.py">scripts/set_center_by_selected_polys.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_by_template.py">scripts/set_center_by_template.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_source_item.py">scripts/set_source_item.py</source>

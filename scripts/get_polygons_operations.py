@@ -106,6 +106,19 @@ def get_polygons_find_by_selected(mesh, selected_polys):
     return selected_polys
 
 
+def get_polygons_most_vertex_count(mesh):
+    if not mesh:
+        return []
+    polygons = sorted(mesh.geometry.polygons, key=lambda poly: poly.numVertices, reverse=True)
+    max_vertexcount = polygons[0].numVertices
+    polys = []
+    for polygon in polygons:
+        if polygon.numVertices != max_vertexcount:
+            break
+        polys.append(polygon)
+    return polys
+
+
 save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
 log_name = h3du.replace_file_ext(modo.Scene().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)
