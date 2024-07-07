@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2022 Dmytro Holub
+# (C)2022-2024 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -15,6 +15,15 @@ from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
+
+
+class Constraints:
+    def __init__(self, mode, order, use_x, use_y, use_z):
+        self.mode = mode
+        self.order = order
+        self.use_x = use_x
+        self.use_y = use_y
+        self.use_z = use_z
 
 
 def get_size(item):
@@ -83,9 +92,14 @@ def set_item_scale(item, scale):
     lx.eval('transform.channel scl.Z {}'.format(scale[2]))
 
 
-def item_align(source, target, do_instance, constraints):
-    # get source size
+def get_replicator_source(item:modo.Item) -> modo.Item:
+    if item.type == 'replicator':
+        ...
+
+
+def item_replicate(source:modo.Item, target:modo.Item, constraints:Constraints):
     source_base = h3du.get_source_of_instance(source)
+
     # get source scale
     sx, sy, sz = get_item_scale(source)
     # base size
@@ -93,11 +107,81 @@ def item_align(source, target, do_instance, constraints):
     source_size = [bx * sx, by * sy, bz * sz]  # type: ignore
     # get target size
     target_size = get_size(target)
+
+    source_item = source
+    source_item.setParent()
+
+    modo.Scene().deselect()
+    source_item.select()
+    target.select()
+    lx.eval('item.match item pos average:false item:{} itemTo:{}'.format(source_item.id, target.id))  # type: ignore
+    lx.eval('item.match item rot average:false item:{} itemTo:{}'.format(source_item.id, target.id))  # type: ignore
+
+    # initiate visibility on instance
+    source_item.select(replace=True)
+    lx.eval('item.channel locator$visible default')
+    # check if there are any 0.0 in source_size or target_size
+    if any([f == 0.0 for f in (source_size + target_size)]):
+        ratio_x = 1
+        ratio_y = 1
+        ratio_z = 1
+    else:
+        ratio_x = target_size[0] / source_size[0]
+        ratio_y = target_size[1] / source_size[1]
+        ratio_z = target_size[2] / source_size[2]
+
+    # determine which constraints are on
+    lock_mode = constraints.mode
+    lock_order = constraints.order
+    if lock_mode == 'XZ':
+        if lock_order == 'X':
+            ratio_z = ratio_x
+        else:
+            ratio_x = ratio_z
+    elif lock_mode == 'XYZ':
+        if lock_order == 'X':
+            ratio_y = ratio_x
+            ratio_z = ratio_x
+        elif lock_order == 'Y':
+            ratio_x = ratio_y
+            ratio_z = ratio_y
+        else:
+            ratio_x = ratio_z
+            ratio_y = ratio_z
+
+    # reset scale for disabled axis
+    if not constraints.use_x:
+        ratio_x = 1.0
+    if not constraints.use_y:
+        ratio_y = 1.0
+    if not constraints.use_z:
+        ratio_z = 1.0
+
+    # set scale
+    scale_factor(source_item, [ratio_x, ratio_y, ratio_z])
+
+    replace_item(item_to_insert=source_item,
+                 item_to_remove=target,
+                 item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
+
+
+def item_align(source:modo.Item, target:modo.Item, do_instance:bool, constraints:Constraints):
+    source_base = h3du.get_source_of_instance(source)
+
+    # get source scale
+    sx, sy, sz = get_item_scale(source)
+    # base size
+    bx, by, bz = get_size(source_base)
+    source_size = [bx * sx, by * sy, bz * sz]  # type: ignore
+    # get target size
+    target_size = get_size(target)
+
     if do_instance:
         source_item = modo.Scene().duplicateItem(item=source_base, instance=True)
     else:
         source_item = source
     source_item.setParent()  # type: ignore
+
     modo.Scene().deselect()
     source_item.select()  # type: ignore
     target.select()
@@ -154,15 +238,6 @@ def item_align(source, target, do_instance, constraints):
     replace_item(item_to_insert=source_item,
                  item_to_remove=target,
                  item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
-
-
-class Constraints:
-    def __init__(self, mode, order, use_x, use_y, use_z):
-        self.mode = mode
-        self.order = order
-        self.use_x = use_x
-        self.use_y = use_y
-        self.use_z = use_z
 
 
 save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
