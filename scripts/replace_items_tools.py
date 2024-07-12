@@ -12,7 +12,7 @@ import modo
 import lx
 
 from h3d_utilites.scripts.h3d_debug import H3dDebug
-import h3d_utilites.scripts.h3d_utils as h3du
+from h3d_utilites.scripts.h3d_utils import get_source_of_instance, get_user_value, replace_file_ext, get_vertex_zero
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
 
@@ -31,7 +31,7 @@ def get_size(item):
         return [0.0, 0.0, 0.0]
     s_x, s_y, s_z = get_item_scale(item)
     if item.type == 'meshInst':
-        corners = h3du.get_source_of_instance(item).geometry.boundingBox  # type: ignore
+        corners = get_source_of_instance(item).geometry.boundingBox  # type: ignore
     else:
         corners = item.geometry.boundingBox
     size_x = abs(corners[1][0] - corners[0][0]) * s_x
@@ -94,7 +94,7 @@ def set_item_scale(item, scale):
 
 def get_replicator_source(item: modo.Item) -> modo.Item:
     if not item:
-        raise ValueError(f'None item provided for replicator source')
+        raise ValueError('None item provided for replicator source')
     if item.type == 'replicator':
         source = item.itemGraph('particle').forward(0)
     elif item.type == 'mesh':
@@ -103,7 +103,7 @@ def get_replicator_source(item: modo.Item) -> modo.Item:
         raise ValueError(f'Invalid  item type for <{item.name=}>: <{item=}>')
     if not source:
         raise ValueError(f'Failed to get replicator sources for <{item.name=}>')
-    
+
     return source  # type: ignore
 
 
@@ -112,7 +112,7 @@ def make_replicator(prototype: modo.Item, point_source: modo.Item) -> modo.Item:
 
 
 def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraints):
-    source_base = h3du.get_source_of_instance(source)
+    source_base = get_source_of_instance(source)
 
     # get source scale
     sx, sy, sz = get_item_scale(source)
@@ -124,16 +124,15 @@ def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraint
     target_size = get_size(target_align)
 
     source_replicator = get_replicator_source(source)
-    point_source = 
-    make_replicator
-    source_align
+    point_source = get_vertex_zero()
+    source_align = make_replicator(source_replicator, point_source)
     source_align.setParent()
 
     modo.Scene().deselect()
     source_align.select()
     target_align.select()
-    lx.eval('item.match item pos average:false item:{} itemTo:{}'.format(source_align.id, target_align.id))  # type: ignore
-    lx.eval('item.match item rot average:false item:{} itemTo:{}'.format(source_align.id, target_align.id))  # type: ignore
+    lx.eval(f'item.match item pos average:false item:{source_align.id} itemTo:{target_align.id}')
+    lx.eval(f'item.match item rot average:false item:{source_align.id} itemTo:{target_align.id}')
 
     # initiate visibility on instance
     source_align.select(replace=True)
@@ -184,7 +183,7 @@ def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraint
 
 
 def item_align(source: modo.Item, target: modo.Item, do_instance: bool, constraints: Constraints):
-    source_base = h3du.get_source_of_instance(source)
+    source_base = get_source_of_instance(source)
 
     # get source scale
     sx, sy, sz = get_item_scale(source)
@@ -258,6 +257,6 @@ def item_align(source: modo.Item, target: modo.Item, do_instance: bool, constrai
                  item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
 
 
-save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
-log_name = h3du.replace_file_ext(modo.Scene().name)
+save_log = get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
+log_name = replace_file_ext(modo.Scene().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)
