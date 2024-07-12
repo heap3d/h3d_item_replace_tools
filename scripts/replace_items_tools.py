@@ -92,12 +92,26 @@ def set_item_scale(item, scale):
     lx.eval('transform.channel scl.Z {}'.format(scale[2]))
 
 
-def get_replicator_source(item:modo.Item) -> modo.Item:
+def get_replicator_source(item: modo.Item) -> modo.Item:
+    if not item:
+        raise ValueError(f'None item provided for replicator source')
     if item.type == 'replicator':
-        ...
+        source = item.itemGraph('particle').forward(0)
+    elif item.type == 'mesh':
+        source = item
+    else:
+        raise ValueError(f'Invalid  item type for <{item.name=}>: <{item=}>')
+    if not source:
+        raise ValueError(f'Failed to get replicator sources for <{item.name=}>')
+    
+    return source  # type: ignore
 
 
-def item_replicate(source:modo.Item, target:modo.Item, constraints:Constraints):
+def make_replicator(prototype: modo.Item, point_source: modo.Item) -> modo.Item:
+    ...
+
+
+def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraints):
     source_base = h3du.get_source_of_instance(source)
 
     # get source scale
@@ -106,19 +120,23 @@ def item_replicate(source:modo.Item, target:modo.Item, constraints:Constraints):
     bx, by, bz = get_size(source_base)
     source_size = [bx * sx, by * sy, bz * sz]  # type: ignore
     # get target size
-    target_size = get_size(target)
+    target_align = target
+    target_size = get_size(target_align)
 
-    source_item = source
-    source_item.setParent()
+    source_replicator = get_replicator_source(source)
+    point_source = 
+    make_replicator
+    source_align
+    source_align.setParent()
 
     modo.Scene().deselect()
-    source_item.select()
-    target.select()
-    lx.eval('item.match item pos average:false item:{} itemTo:{}'.format(source_item.id, target.id))  # type: ignore
-    lx.eval('item.match item rot average:false item:{} itemTo:{}'.format(source_item.id, target.id))  # type: ignore
+    source_align.select()
+    target_align.select()
+    lx.eval('item.match item pos average:false item:{} itemTo:{}'.format(source_align.id, target_align.id))  # type: ignore
+    lx.eval('item.match item rot average:false item:{} itemTo:{}'.format(source_align.id, target_align.id))  # type: ignore
 
     # initiate visibility on instance
-    source_item.select(replace=True)
+    source_align.select(replace=True)
     lx.eval('item.channel locator$visible default')
     # check if there are any 0.0 in source_size or target_size
     if any([f == 0.0 for f in (source_size + target_size)]):
@@ -158,14 +176,14 @@ def item_replicate(source:modo.Item, target:modo.Item, constraints:Constraints):
         ratio_z = 1.0
 
     # set scale
-    scale_factor(source_item, [ratio_x, ratio_y, ratio_z])
+    scale_factor(source_align, [ratio_x, ratio_y, ratio_z])
 
-    replace_item(item_to_insert=source_item,
-                 item_to_remove=target,
+    replace_item(item_to_insert=source_align,
+                 item_to_remove=target_align,
                  item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
 
 
-def item_align(source:modo.Item, target:modo.Item, do_instance:bool, constraints:Constraints):
+def item_align(source: modo.Item, target: modo.Item, do_instance: bool, constraints: Constraints):
     source_base = h3du.get_source_of_instance(source)
 
     # get source scale
