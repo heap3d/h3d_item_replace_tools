@@ -12,7 +12,12 @@ import modo
 import lx
 
 from h3d_utilites.scripts.h3d_debug import H3dDebug
-from h3d_utilites.scripts.h3d_utils import get_source_of_instance, get_user_value, replace_file_ext, get_vertex_zero
+from h3d_utilites.scripts.h3d_utils import (
+    get_source_of_instance,
+    get_user_value,
+    replace_file_ext,
+    get_vertex_zero,
+    )
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
 
