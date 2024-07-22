@@ -10,6 +10,7 @@
 
 import modo
 import lx
+import modo.constants as c
 
 from h3d_utilites.scripts.h3d_debug import H3dDebug
 from h3d_utilites.scripts.h3d_utils import (
@@ -113,7 +114,12 @@ def get_replicator_source(item: modo.Item) -> modo.Item:
 
 
 def make_replicator(prototype: modo.Item, point_source: modo.Item) -> modo.Item:
-    ...
+    # lx.eval('item.create replicator')
+    replicator = modo.Scene().addItem(itype=c.REPLICATOR_TYPE)
+    replicator.select(replace=True)
+    lx.eval(f'replicator.particle {point_source.id}')
+    lx.eval(f'replicator.source {prototype.id}')
+    return replicator
 
 
 def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraints):
