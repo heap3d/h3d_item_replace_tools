@@ -47,7 +47,7 @@ def get_size(item):
     return [size_x, size_y, size_z]
 
 
-def scale_factor(item, factor):
+def set_scale_factor(item, factor):
     # get current scale
     s_x, s_y, s_z = get_item_scale(item)
     # set new scale
@@ -122,28 +122,71 @@ def make_replicator(prototype: modo.Item, point_source: modo.Item) -> modo.Item:
     return replicator
 
 
-def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraints):
+def get_source_size(source: modo.Item) -> list[float]:
     source_base = get_source_of_instance(source)
+    source_scl_x, source_scl_y, source_scl_z = get_item_scale(source)
+    base_scl_x, base_scl_y, base_scl_z = get_size(source_base)
+    source_size = [base_scl_x * source_scl_x, base_scl_y * source_scl_y, base_scl_z * source_scl_z]  # type: ignore
 
-    # get source scale
-    sx, sy, sz = get_item_scale(source)
-    # base size
-    bx, by, bz = get_size(source_base)
-    source_size = [bx * sx, by * sy, bz * sz]  # type: ignore
-    # get target size
-    target_align = target
-    target_size = get_size(target_align)
+    return source_size
+
+
+def match_pos_rot(item: modo.Item, itemTo: modo.Item):
+    lx.eval(f'item.match item pos average:false item:{item.id} itemTo:{itemTo.id}')
+    lx.eval(f'item.match item rot average:false item:{item.id} itemTo:{itemTo.id}')
+
+
+def get_ratios(source_size: list[float], target_size: list[float], constraints: Constraints) -> list[float]:
+    # check if there are any 0.0 in source_size or target_size
+    if any([f == 0.0 for f in (source_size + target_size)]):
+        ratio_x = 1
+        ratio_y = 1
+        ratio_z = 1
+    else:
+        ratio_x = target_size[0] / source_size[0]
+        ratio_y = target_size[1] / source_size[1]
+        ratio_z = target_size[2] / source_size[2]
+
+    # determine which constraints are on
+    lock_mode = constraints.mode
+    lock_order = constraints.order
+    if lock_mode == 'XZ':
+        if lock_order == 'X':
+            ratio_z = ratio_x
+        else:
+            ratio_x = ratio_z
+    elif lock_mode == 'XYZ':
+        if lock_order == 'X':
+            ratio_y = ratio_x
+            ratio_z = ratio_x
+        elif lock_order == 'Y':
+            ratio_x = ratio_y
+            ratio_z = ratio_y
+        else:
+            ratio_x = ratio_z
+            ratio_y = ratio_z
+
+    # reset scale for disabled axis
+    if not constraints.use_x:
+        ratio_x = 1.0
+    if not constraints.use_y:
+        ratio_y = 1.0
+    if not constraints.use_z:
+        ratio_z = 1.0
+
+    return ratio_x, ratio_y, ratio_z  # type: ignore
+
+
+def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraints):
+    source_size = get_source_size(source)
+    target_size = get_size(target)
 
     source_replicator = get_replicator_source(source)
     point_source = get_vertex_zero()
     source_align = make_replicator(source_replicator, point_source)
     source_align.setParent()
 
-    modo.Scene().deselect()
-    source_align.select()
-    target_align.select()
-    lx.eval(f'item.match item pos average:false item:{source_align.id} itemTo:{target_align.id}')
-    lx.eval(f'item.match item rot average:false item:{source_align.id} itemTo:{target_align.id}')
+    match_pos_rot(source_align, target)
 
     # initiate visibility on instance
     source_align.select(replace=True)
@@ -186,10 +229,10 @@ def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraint
         ratio_z = 1.0
 
     # set scale
-    scale_factor(source_align, [ratio_x, ratio_y, ratio_z])
+    set_scale_factor(source_align, [ratio_x, ratio_y, ratio_z])
 
     replace_item(item_to_insert=source_align,
-                 item_to_remove=target_align,
+                 item_to_remove=target,
                  item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
 
 
@@ -261,7 +304,7 @@ def item_align(source: modo.Item, target: modo.Item, do_instance: bool, constrai
         ratio_z = 1.0
 
     # set scale
-    scale_factor(source_item, [ratio_x, ratio_y, ratio_z])
+    set_scale_factor(source_item, [ratio_x, ratio_y, ratio_z])
 
     replace_item(item_to_insert=source_item,
                  item_to_remove=target,
