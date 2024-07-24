@@ -195,6 +195,7 @@ def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraint
     point_source = get_vertex_zero()
 
     source_align = make_replicator(source_replicator, point_source)
+    source_align.name = source_replicator.name
     source_align.setParent()
     match_pos_rot(source_align, target)
     set_scale_factor(source_align, get_ratios(source, target, constraints))

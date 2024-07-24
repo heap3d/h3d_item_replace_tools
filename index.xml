@@ -15,6 +15,7 @@
 		<source target="h3d_item_replace_tools/scripts/modo_get_mesh_volume_buggy.py">scripts/modo_get_mesh_volume_buggy.py</source>
 		<source target="h3d_item_replace_tools/scripts/modo_polygonCoplanar.py">scripts/modo_polygonCoplanar.py</source>
 		<source target="h3d_item_replace_tools/scripts/replace_by_instance.py">scripts/replace_by_instance.py</source>
+		<source target="h3d_item_replace_tools/scripts/replace_by_replicator.py">scripts/replace_by_replicator.py</source>
 		<source target="h3d_item_replace_tools/scripts/replace_by_item.py">scripts/replace_by_item.py</source>
 		<source target="h3d_item_replace_tools/scripts/replace_by_source.py">scripts/replace_by_source.py</source>
 		<source target="h3d_item_replace_tools/scripts/replace_by_source_instance.py">scripts/replace_by_source_instance.py</source>
