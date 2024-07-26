@@ -23,6 +23,9 @@ from h3d_utilites.scripts.h3d_utils import (
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
 
 
+MULTIPOINT_SOURCE_SUFFIX = 'multipoint_source'
+
+
 class Constraints:
     def __init__(self, mode, order, use_x, use_y, use_z):
         self.mode = mode
@@ -190,12 +193,16 @@ def set_visible(item: modo.Item, mode: str = 'default'):
     lx.eval(f'item.channel locator$visible {mode} item:{item.id}')
 
 
-def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraints):
-    source_replicator = get_replicator_source(source)
+def item_replicate(
+        source: modo.Item,
+        target: modo.Item,
+        constraints: Constraints
+        ) -> modo.Item:
+    prototype = get_replicator_source(source)
     point_source = get_vertex_zero()
 
-    source_align = make_replicator(source_replicator, point_source)
-    source_align.name = source_replicator.name
+    source_align = make_replicator(prototype, point_source)
+    source_align.name = prototype.name
     source_align.setParent()
     match_pos_rot(source_align, target)
     set_scale_factor(source_align, get_ratios(source, target, constraints))
@@ -203,11 +210,65 @@ def item_replicate(source: modo.Item, target: modo.Item, constraints: Constraint
     replace_item(item_to_insert=source_align,
                  item_to_remove=target,
                  item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
-
     set_visible(source_align)
 
+    return source_align
 
-def item_align(source: modo.Item, target: modo.Item, do_instance: bool, constraints: Constraints):
+
+def create_multipoint_mesh() -> modo.Item:
+    mesh = modo.Scene().addMesh()
+    lx.eval('?vertMap.new type:xfrm')
+    lx.eval('?vertMap.new Size psiz true {0.78 0.78 0.78} 1.0')
+    return mesh
+
+
+def point_source_name(basename: str) -> str:
+    return f'{basename}_{MULTIPOINT_SOURCE_SUFFIX}'
+
+
+def add_vertex(mesh: modo.Item, pos: list[float], rot: list[float], scl: list[float]):
+    if not mesh:
+        raise ValueError('No mesh specified')
+
+    mesh.select(replace=True)
+    lx.eval('tool.set prim.makeVertex on 0')
+    lx.eval('tool.attr prim.makeVertex cenX 0.1')
+    lx.eval('tool.attr prim.makeVertex cenY 0.1')
+    lx.eval('tool.attr prim.makeVertex cenZ 0.1')
+    lx.eval('tool.apply')
+    lx.eval('tool.set prim.makeVertex off 0')
+
+
+def item_replicate_multipoint(
+        source: modo.Item,
+        targets: list[modo.Item],
+        constraints: Constraints
+        ) -> list[modo.Item]:
+
+    prototype = get_replicator_source(source)
+    point_source = create_multipoint_mesh()
+
+    
+    replicator = make_replicator(prototype, point_source)
+    replicator.name = prototype.name
+    point_source.name = point_source_name(replicator.name)
+    replicator.setParent()
+
+    # match_pos_rot(replicator, target)
+    # set_scale_factor(replicator, get_ratios(source, target, constraints))
+
+    # replace_item(item_to_insert=replicator,
+    #              item_to_remove=target,
+    #              item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
+    # set_visible(replicator)
+
+
+def item_dublicate_and_align(
+        source: modo.Item,
+        target: modo.Item,
+        do_instance: bool,
+        constraints: Constraints
+        ) -> modo.Item:
     if do_instance:
         source_item = modo.Scene().duplicateItem(item=get_source_of_instance(source), instance=True)
     else:
@@ -221,8 +282,9 @@ def item_align(source: modo.Item, target: modo.Item, do_instance: bool, constrai
     replace_item(item_to_insert=source_item,
                  item_to_remove=target,
                  item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
-
     set_visible(source_item)  # type: ignore
+
+    return source_item  # type: ignore
 
 
 save_log = get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)

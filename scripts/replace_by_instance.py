@@ -15,7 +15,7 @@ from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
-from h3d_item_replace_tools.scripts.replace_items_tools import Constraints, item_align
+from h3d_item_replace_tools.scripts.replace_items_tools import Constraints, item_dublicate_and_align
 
 
 def main():
@@ -42,12 +42,15 @@ def main():
     target_candidates = selected[:-1]
     # skip selected group locators
     targets = filter(lambda i: i.type != h3du.itype_str(c.GROUPLOCATOR_TYPE), target_candidates)
+    new_items: list[modo.Item] = []
     for target in targets:
-        item_align(source=source, target=target, do_instance=True, constraints=constraints)
+        new_items.append(
+            item_dublicate_and_align(source=source, target=target, do_instance=True, constraints=constraints)
+            )
 
-    source_mesh = h3du.get_source_of_instance(source)
-    if source_mesh:
-        source_mesh.select(replace=True)
+    modo.Scene().deselect()
+    for item in new_items:
+        item.select()
 
     print('done.')
     h3dd.print_fn_out()

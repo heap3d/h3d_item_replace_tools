@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # ================================
-# (C)2022 Dmytro Holub
+# (C)2022-2024 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
 # EMAG
-# Replace Selected Item by Last Selected
+# Replace Selected Items by individual Replicators of the Last Selected
 # ================================
 
 import modo
@@ -15,11 +15,11 @@ from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
-from h3d_item_replace_tools.scripts.replace_items_tools import Constraints, item_dublicate_and_align
+from h3d_item_replace_tools.scripts.replace_items_tools import Constraints, item_replicate_multipoint
 
 
 def main():
-    h3dd.print_debug('\n\n----- replace_by_item.py -----\n')
+    h3dd.print_debug('\n\n----- replace_by_replicator.py -----\n')
     h3dd.print_fn_in()
     print('')
     print('start...')
@@ -38,15 +38,15 @@ def main():
     )
     # source are last selected item
     source = selected[-1]
-    # targets are previous to last
-    targets = selected[-2:-1]
-    new_items: list[modo.Item] = []
-    for target in targets:
-        item_dublicate_and_align(source=source, target=target, do_instance=False, constraints=constraints)
+    # targets are all but last
+    target_candidates = selected[:-1]
+    # skip selected group locators
+    targets = filter(lambda i: i.type != h3du.itype_str(c.GROUPLOCATOR_TYPE), target_candidates)
+    item_replicate_multipoint(source=source, targets=targets, constraints=constraints)  # type: ignore
 
-    modo.Scene().deselect()
-    for item in new_items:
-        item.select()
+    source_mesh = h3du.get_source_of_instance(source)
+    if source_mesh:
+        source_mesh.select(replace=True)
 
     print('done.')
     h3dd.print_fn_out()
