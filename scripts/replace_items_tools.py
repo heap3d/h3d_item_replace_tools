@@ -217,8 +217,9 @@ def item_replicate(
 
 def create_multipoint_mesh() -> modo.Item:
     mesh = modo.Scene().addMesh()
-    lx.eval('?vertMap.new type:xfrm')
-    lx.eval('?vertMap.new Size psiz true {0.78 0.78 0.78} 1.0')
+    mesh.select(replace=True)
+    lx.eval('vertMap.new type:xfrm')
+    lx.eval('vertMap.new Size psiz true {0.78 0.78 0.78} 1.0')
     return mesh
 
 
@@ -232,9 +233,9 @@ def add_vertex(mesh: modo.Item, pos: list[float], rot: list[float], scl: list[fl
 
     mesh.select(replace=True)
     lx.eval('tool.set prim.makeVertex on 0')
-    lx.eval('tool.attr prim.makeVertex cenX 0.1')
-    lx.eval('tool.attr prim.makeVertex cenY 0.1')
-    lx.eval('tool.attr prim.makeVertex cenZ 0.1')
+    lx.eval(f'tool.attr prim.makeVertex cenX {pos[0]}')
+    lx.eval(f'tool.attr prim.makeVertex cenY {pos[1]}')
+    lx.eval(f'tool.attr prim.makeVertex cenZ {pos[2]}')
     lx.eval('tool.apply')
     lx.eval('tool.set prim.makeVertex off 0')
 
@@ -248,19 +249,16 @@ def item_replicate_multipoint(
     prototype = get_replicator_source(source)
     point_source = create_multipoint_mesh()
 
-    
+    for target in targets:
+        pos = target.position.get()
+        rot = target.rotation.get()
+        scl = get_ratios(source, target, constraints)
+        add_vertex(point_source, pos, rot, scl)
+
     replicator = make_replicator(prototype, point_source)
     replicator.name = prototype.name
     point_source.name = point_source_name(replicator.name)
     replicator.setParent()
-
-    # match_pos_rot(replicator, target)
-    # set_scale_factor(replicator, get_ratios(source, target, constraints))
-
-    # replace_item(item_to_insert=replicator,
-    #              item_to_remove=target,
-    #              item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
-    # set_visible(replicator)
 
 
 def item_dublicate_and_align(
