@@ -11,6 +11,7 @@
 import modo
 import lx
 import modo.constants as c
+import math
 
 from h3d_utilites.scripts.h3d_debug import H3dDebug
 from h3d_utilites.scripts.h3d_utils import (
@@ -218,8 +219,9 @@ def item_replicate(
 def create_multipoint_mesh() -> modo.Item:
     mesh = modo.Scene().addMesh()
     mesh.select(replace=True)
-    lx.eval('vertMap.new type:xfrm')
+    lx.eval('vertMap.new Transform type:xfrm')
     lx.eval('vertMap.new Size psiz true {0.78 0.78 0.78} 1.0')
+
     return mesh
 
 
@@ -227,11 +229,14 @@ def point_source_name(basename: str) -> str:
     return f'{basename}_{MULTIPOINT_SOURCE_SUFFIX}'
 
 
-def add_vertex(mesh: modo.Item, pos: list[float], rot: list[float], scl: list[float]):
+def add_vertex(mesh: modo.Item, pos: list[float], rot: list[float], scl: float):
     if not mesh:
         raise ValueError('No mesh specified')
 
     mesh.select(replace=True)
+    lx.eval('select.type vertex')
+
+    printd(f'position: {pos}', 1)
     lx.eval('tool.set prim.makeVertex on 0')
     lx.eval(f'tool.attr prim.makeVertex cenX {pos[0]}')
     lx.eval(f'tool.attr prim.makeVertex cenY {pos[1]}')
@@ -239,26 +244,53 @@ def add_vertex(mesh: modo.Item, pos: list[float], rot: list[float], scl: list[fl
     lx.eval('tool.apply')
     lx.eval('tool.set prim.makeVertex off 0')
 
+    printd(f'rotation: {math.degrees(rot[0])} {math.degrees(rot[1])} {math.degrees(rot[2])}', 1)
+    lx.eval('select.vertexMap Transform xfrm replace')
+    lx.eval('tool.set TransformRotate on')
+    lx.eval(f'tool.setAttr xfrm.transform RX {math.degrees(rot[0])}')
+    lx.eval(f'tool.setAttr xfrm.transform RY {math.degrees(rot[1])}')
+    lx.eval(f'tool.setAttr xfrm.transform RZ {math.degrees(rot[2])}')
+    lx.eval('tool.doApply')
+    lx.eval('tool.set TransformRotate off 0')
+
+    printd(f'scale: {scl}', 1)
+    lx.eval('select.vertexMap Size psiz replace')
+    lx.eval('tool.set vertMap.setWeight on')
+    lx.eval(f'tool.setAttr vertMap.setWeight weight {scl}')
+    lx.eval('tool.doApply')
+    lx.eval('tool.set vertMap.setWeight off 0')
+    lx.eval('select.drop vertex')
+
 
 def item_replicate_multipoint(
         source: modo.Item,
         targets: list[modo.Item],
         constraints: Constraints
-        ) -> list[modo.Item]:
+        ) -> modo.Item:
 
     prototype = get_replicator_source(source)
     point_source = create_multipoint_mesh()
 
+    rot_converter = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
+    lx.eval(f'transform.channel order xyz item:{rot_converter.id}')
+    tmp_folder = get_tmp_folder(h3dc.TMP_FOLDER_NAME)
     for target in targets:
         pos = target.position.get()
-        rot = target.rotation.get()
-        scl = get_ratios(source, target, constraints)
+        match_pos_rot(rot_converter, target)
+        rot = rot_converter.rotation.get()
+        scl = max(get_ratios(source, target, constraints))
         add_vertex(point_source, pos, rot, scl)
+        lx.eval(f'item.parent item:{target.id} parent:{tmp_folder.id} inPlace:1')
+    modo.Scene().removeItems(rot_converter)
 
     replicator = make_replicator(prototype, point_source)
     replicator.name = prototype.name
     point_source.name = point_source_name(replicator.name)
     replicator.setParent()
+    if source.parent:
+        lx.eval(f'item.parent item:{replicator.id} parent:{source.parent.id} inPlace:1')
+
+    return replicator
 
 
 def item_dublicate_and_align(
@@ -288,3 +320,5 @@ def item_dublicate_and_align(
 save_log = get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
 log_name = replace_file_ext(modo.Scene().name)
 h3dd = H3dDebug(enable=save_log, file=log_name)
+printd = h3dd.print_debug
+printi = h3dd.print_items

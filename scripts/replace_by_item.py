@@ -10,6 +10,7 @@
 
 import modo
 import modo.constants as c
+import lx
 
 from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
@@ -44,6 +45,7 @@ def main():
     for target in targets:
         item_dublicate_and_align(source=source, target=target, do_instance=False, constraints=constraints)
 
+    lx.eval('select.type item')
     modo.Scene().deselect()
     for item in new_items:
         item.select()

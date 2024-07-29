@@ -10,6 +10,7 @@
 
 import modo
 import modo.constants as c
+import lx
 
 from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
@@ -42,11 +43,10 @@ def main():
     target_candidates = selected[:-1]
     # skip selected group locators
     targets = filter(lambda i: i.type != h3du.itype_str(c.GROUPLOCATOR_TYPE), target_candidates)
-    item_replicate_multipoint(source=source, targets=targets, constraints=constraints)  # type: ignore
+    replicator = item_replicate_multipoint(source=source, targets=targets, constraints=constraints)  # type: ignore
 
-    source_mesh = h3du.get_source_of_instance(source)
-    if source_mesh:
-        source_mesh.select(replace=True)
+    lx.eval('select.type item')
+    replicator.select(replace=True)
 
     print('done.')
     h3dd.print_fn_out()
