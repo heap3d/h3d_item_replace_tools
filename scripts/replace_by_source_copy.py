@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # ================================
-# (C)2022 Dmytro Holub
+# (C)2022-2024 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
 # EMAG
-# Replace Selected Items by an Instance of the Source item
+# Replace Selected Items by an Copy of the Source item
 # ================================
 
 import lx
@@ -19,7 +19,7 @@ import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
 
 def main():
     print('')
-    print('replace_by_source_instance.py start...')
+    print('replace_by_source_copy.py start...')
 
     selection = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
     if not selection:
@@ -35,9 +35,9 @@ def main():
     # add source item to selection
     source_item.select()
 
-    lx.eval('@{scripts/replace_by_instance.py}')
+    lx.eval('@{scripts/replace_by_copy.py}')
 
-    print('replace_by_source_instance.py done.')
+    print('replace_by_source_copy.py done.')
 
 
 if __name__ == '__main__':

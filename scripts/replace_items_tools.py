@@ -293,7 +293,7 @@ def item_replicate_multipoint(
     return replicator
 
 
-def item_dublicate_and_align(
+def item_instance_and_align(
         source: modo.Item,
         target: modo.Item,
         do_instance: bool,
@@ -307,6 +307,25 @@ def item_dublicate_and_align(
     match_pos_rot(source_item, target)  # type: ignore
     if do_instance:
         match_scl(source_item, get_source_of_instance(source))  # type: ignore
+    set_scale_factor(source_item, get_ratios(source, target, constraints))
+
+    replace_item(item_to_insert=source_item,
+                 item_to_remove=target,
+                 item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
+    set_visible(source_item)  # type: ignore
+
+    return source_item  # type: ignore
+
+
+def item_copy_and_align(
+        source: modo.Item,
+        target: modo.Item,
+        constraints: Constraints
+        ) -> modo.Item:
+    source_item = modo.Scene().duplicateItem(item=get_source_of_instance(source))
+    source_item.setParent()  # type: ignore
+    match_pos_rot(source_item, target)  # type: ignore
+    match_scl(source_item, get_source_of_instance(source))  # type: ignore
     set_scale_factor(source_item, get_ratios(source, target, constraints))
 
     replace_item(item_to_insert=source_item,

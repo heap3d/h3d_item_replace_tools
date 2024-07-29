@@ -16,7 +16,7 @@ from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
-from h3d_item_replace_tools.scripts.replace_items_tools import Constraints, item_dublicate_and_align
+from h3d_item_replace_tools.scripts.replace_items_tools import Constraints, item_instance_and_align
 
 
 def main():
@@ -46,7 +46,7 @@ def main():
     new_items: list[modo.Item] = []
     for target in targets:
         new_items.append(
-            item_dublicate_and_align(source=source, target=target, do_instance=True, constraints=constraints)
+            item_instance_and_align(source=source, target=target, do_instance=True, constraints=constraints)
             )
 
     lx.eval('select.type item')

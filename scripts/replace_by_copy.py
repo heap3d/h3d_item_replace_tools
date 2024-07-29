@@ -1,11 +1,11 @@
 #!/usr/bin/python
 # ================================
-# (C)2022 Dmytro Holub
+# (C)2022-2024 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
 # EMAG
-# Replace Selected Items by an Instance with the Last Selected
+# Replace Selected Items by an Copy with the Last Selected
 # ================================
 
 import modo
@@ -16,11 +16,11 @@ from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
-from h3d_item_replace_tools.scripts.replace_items_tools import Constraints, item_dublicate_and_align
+from h3d_item_replace_tools.scripts.replace_items_tools import Constraints, item_copy_and_align
 
 
 def main():
-    h3dd.print_debug('\n\n----- replace_by_instance.py -----\n')
+    h3dd.print_debug('\n\n----- replace_by_copy.py -----\n')
     h3dd.print_fn_in()
     print('')
     print('start...')
@@ -46,7 +46,7 @@ def main():
     new_items: list[modo.Item] = []
     for target in targets:
         new_items.append(
-            item_dublicate_and_align(source=source, target=target, do_instance=True, constraints=constraints)
+            item_copy_and_align(source=source, target=target, constraints=constraints)
             )
 
     lx.eval('select.type item')
