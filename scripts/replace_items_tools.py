@@ -19,6 +19,8 @@ from h3d_utilites.scripts.h3d_utils import (
     get_user_value,
     replace_file_ext,
     get_vertex_zero,
+    match_pos_rot,
+    match_scl,
     )
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
@@ -135,15 +137,6 @@ def get_source_size(source: modo.Item) -> list[float]:
     source_size = [base_scl_x * source_scl_x, base_scl_y * source_scl_y, base_scl_z * source_scl_z]  # type: ignore
 
     return source_size
-
-
-def match_pos_rot(item: modo.Item, itemTo: modo.Item):
-    lx.eval(f'item.match item pos average:false item:{item.id} itemTo:{itemTo.id}')
-    lx.eval(f'item.match item rot average:false item:{item.id} itemTo:{itemTo.id}')
-
-
-def match_scl(item: modo.Item, itemTo: modo.Item):
-    lx.eval(f'item.match item scl average:false item:{item.id} itemTo:{itemTo.id}')
 
 
 def get_ratios(source: modo.Item, target: modo.Item, constraints: Constraints) -> list[float]:
