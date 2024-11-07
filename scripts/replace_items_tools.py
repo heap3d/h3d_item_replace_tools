@@ -101,9 +101,9 @@ def get_item_scale(item):
 
 
 def set_item_scale(item: modo.Item, scale: list[float]):
-    lx.eval(f'transform.channel scl.X {scale[0]} item:{item.id}')
-    lx.eval(f'transform.channel scl.Y {scale[1]} item:{item.id}')
-    lx.eval(f'transform.channel scl.Z {scale[2]} item:{item.id}')
+    lx.eval(f'transform.channel scl.X {scale[0]} item:{{{item.id}}}')
+    lx.eval(f'transform.channel scl.Y {scale[1]} item:{{{item.id}}}')
+    lx.eval(f'transform.channel scl.Z {scale[2]} item:{{{item.id}}}')
 
 
 def get_replicator_source(item: modo.Item) -> modo.Item:
@@ -125,8 +125,8 @@ def make_replicator(prototype: modo.Item, point_source: modo.Item) -> modo.Item:
     # lx.eval('item.create replicator')
     replicator = modo.Scene().addItem(itype=c.REPLICATOR_TYPE)
     replicator.select(replace=True)
-    lx.eval(f'replicator.particle {point_source.id}')
-    lx.eval(f'replicator.source {prototype.id}')
+    lx.eval(f'replicator.particle {{{point_source.id}}}')
+    lx.eval(f'replicator.source {{{prototype.id}}}')
 
     return replicator
 
@@ -184,7 +184,7 @@ def get_ratios(source: modo.Item, target: modo.Item, constraints: Constraints) -
 
 
 def set_visible(item: modo.Item, mode: str = 'default'):
-    lx.eval(f'item.channel locator$visible {mode} item:{item.id}')
+    lx.eval(f'item.channel locator$visible {mode} item:{{{item.id}}}')
 
 
 def item_replicate(
@@ -265,7 +265,7 @@ def item_replicate_multipoint(
     point_source = create_multipoint_mesh()
 
     rot_converter = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
-    lx.eval(f'transform.channel order xyz item:{rot_converter.id}')
+    lx.eval(f'transform.channel order xyz item:{{{rot_converter.id}}}')
     tmp_folder = get_tmp_folder(h3dc.TMP_FOLDER_NAME)
     for target in targets:
         pos = target.position.get()
@@ -273,7 +273,7 @@ def item_replicate_multipoint(
         rot = rot_converter.rotation.get()
         scl = max(get_ratios(source, target, constraints))
         add_vertex(point_source, pos, rot, scl)
-        lx.eval(f'item.parent item:{target.id} parent:{tmp_folder.id} inPlace:1')
+        lx.eval(f'item.parent item:{{{target.id}}} parent:{{{tmp_folder.id}}} inPlace:1')
     modo.Scene().removeItems(rot_converter)
 
     replicator = make_replicator(prototype, point_source)
@@ -281,7 +281,7 @@ def item_replicate_multipoint(
     point_source.name = point_source_name(replicator.name)
     replicator.setParent()
     if source.parent:
-        lx.eval(f'item.parent item:{replicator.id} parent:{source.parent.id} inPlace:1')
+        lx.eval(f'item.parent item:{{{replicator.id}}} parent:{{{source.parent.id}}} inPlace:1')
 
     return replicator
 
