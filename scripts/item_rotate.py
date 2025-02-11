@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2022 Dmytro Holub
+# (C)2022-2025 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -8,29 +8,23 @@
 # Rotate selected items by predefined angle using local center
 # ================================
 
-import modo
 import modo.constants as c
-import modo.mathutils as mmu
+from modo import Vector3, Scene
 
-import h3d_utilites.scripts.h3d_utils as h3du
+from h3d_utilites.scripts.h3d_utils import item_rotate, get_user_value
 
-import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
+from h3d_item_replace_tools.scripts.h3d_kit_constants import USER_VAL_NAME_ANGLE_AXIS, USER_VAL_NAME_ANGLE_STEP
 
 
 def main():
-    print('item_rotate.py: start...')
-    # get current selection
-    selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
-    # get rotation axis
-    rotation_axis = h3du.get_user_value(h3dc.USER_VAL_NAME_ANGLE_AXIS)
-    # get rotation angle
-    rotation_angle = h3du.get_user_value(h3dc.USER_VAL_NAME_ANGLE_STEP)
-    # construct degrees triple
+    selected = Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
+    rotation_axis = get_user_value(USER_VAL_NAME_ANGLE_AXIS)
+    rotation_angle = get_user_value(USER_VAL_NAME_ANGLE_STEP)
+
     angle = {'X': 0, 'Y': 0, 'Z': 0}
     angle[rotation_axis] = rotation_angle
     for item in selected:
-        h3du.item_rotate(item, mmu.Vector3(angle['X'], angle['Y'], angle['Z']))
-    print('item_rotate.py: done.')
+        item_rotate(item, Vector3(angle['X'], angle['Y'], angle['Z']))
 
 
 if __name__ == '__main__':
