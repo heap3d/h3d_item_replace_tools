@@ -21,6 +21,8 @@ from h3d_utilites.scripts.h3d_utils import (
     get_vertex_zero,
     match_pos_rot,
     match_scl,
+    get_parent_index,
+    parent_items_to,
     )
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
@@ -292,12 +294,21 @@ def item_instance_and_align(
         do_instance: bool,
         constraints: Constraints
         ) -> modo.Item:
+
+    if not source:
+        raise ValueError('No source item provided')
     if do_instance:
         source_item = modo.Scene().duplicateItem(item=get_source_of_instance(source), instance=True)
+        if not source_item:
+            raise ValueError('Failed to duplicate item')
     else:
         source_item = source
-    source_item.setParent()  # type: ignore
-    match_pos_rot(source_item, target)  # type: ignore
+
+    target_parent = target.parent
+    target_index = get_parent_index(target)
+    source_item.setParent()
+    match_pos_rot(source_item, target)
+
     if do_instance:
         match_scl(source_item, get_source_of_instance(source))  # type: ignore
     set_scale_factor(source_item, get_ratios(source, target, constraints))
@@ -305,9 +316,12 @@ def item_instance_and_align(
     replace_item(item_to_insert=source_item,
                  item_to_remove=target,
                  item_to_remove_new_parent=get_tmp_folder(h3dc.TMP_FOLDER_NAME))
-    set_visible(source_item)  # type: ignore
 
-    return source_item  # type: ignore
+    set_visible(source_item)
+
+    parent_items_to([source_item,], target_parent, target_index)
+
+    return source_item
 
 
 def item_copy_and_align(
