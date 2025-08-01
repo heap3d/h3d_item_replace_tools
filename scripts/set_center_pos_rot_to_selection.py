@@ -35,6 +35,9 @@ def main():
 
     new_meshes: list[modo.Mesh] = []
     for mesh in selected_meshes:
+        if not mesh.geometry.numVertices:
+            continue
+
         select_components(mesh, selected_components[mesh], select_type)
 
         locator = create_loc_at_selection(mesh, select_type, orient=True)
