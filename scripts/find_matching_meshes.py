@@ -18,9 +18,7 @@ from h3d_utilites.scripts.h3d_debug import H3dDebug
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
 from h3d_item_replace_tools.scripts.mesh_islands_to_items import is_mesh_similar, DetectOptions
-
-
-COLOR_PROCESSED = 'orange'
+from scripts.utilites import COLOR_PROCESSED
 
 
 def place_center_at_polygons(mesh, polys, do_poly_triple):
