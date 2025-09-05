@@ -1,6 +1,6 @@
 #!/usr/bin/python
 # ================================
-# (C)2022 Dmytro Holub
+# (C)2022-2025 Dmytro Holub
 # heap3d@gmail.com
 # --------------------------------
 # modo python
@@ -12,7 +12,6 @@
 import modo
 import modo.constants as c
 
-from h3d_utilites.scripts.h3d_debug import H3dDebug
 import h3d_utilites.scripts.h3d_utils as h3du
 
 import h3d_item_replace_tools.scripts.h3d_kit_constants as h3dc
@@ -20,14 +19,26 @@ from h3d_item_replace_tools.scripts.mesh_islands_to_items import group_similar_i
 
 
 def main():
-    h3dd.print_debug('\n\n----- smart_group_meshes.py -----\n')
-    h3dd.print_fn_in()
     print('')
     print('start...')
 
-    scene = modo.Scene()
-    do_group_equal = h3du.get_user_value(h3dc.USER_VAL_NAME_GROUP_EQUAL)
+    selected_meshes = modo.Scene().selectedByType(itype=c.MESH_TYPE)
 
+    detect_options = get_ui_values()
+    group_similar_items(selected_meshes, detect_options)
+
+    do_group_equal = h3du.get_user_value(h3dc.USER_VAL_NAME_GROUP_EQUAL)
+    if do_group_equal:
+        group_equal_meshes(selected_meshes, detect_options)
+
+    modo.Scene().deselect()
+    for item in selected_meshes:
+        item.select()
+
+    print('done.')
+
+
+def get_ui_values() -> DetectOptions:
     do_bb = modo.mathutils.Vector3()
     do_bb.x = h3du.get_user_value(h3dc.USER_VAL_NAME_DO_BOUNDING_BOX_X)
     do_bb.y = h3du.get_user_value(h3dc.USER_VAL_NAME_DO_BOUNDING_BOX_Y)
@@ -58,35 +69,17 @@ def main():
     do_vol = h3du.get_user_value(h3dc.USER_VAL_NAME_DO_MESH_VOL)
     vol_thld = h3du.get_user_value(h3dc.USER_VAL_NAME_VOL_THRESHOLD)
 
-    detect_options = DetectOptions(do_bounding_box=do_bb,
-                                   do_center_pos=do_ctr,
-                                   do_com_pos=do_com,
-                                   do_mesh_vol=do_vol,
-                                   bb_threshold=bb_thld,
-                                   center_threshold=ctr_thld,
-                                   com_threshold=com_thld,
-                                   vol_threshold=vol_thld)
+    return DetectOptions(
+        do_bounding_box=do_bb,
+        do_center_pos=do_ctr,
+        do_com_pos=do_com,
+        do_mesh_vol=do_vol,
+        bb_threshold=bb_thld,
+        center_threshold=ctr_thld,
+        com_threshold=com_thld,
+        vol_threshold=vol_thld
+    )
 
-    selected_meshes = scene.selectedByType(itype=c.MESH_TYPE)
-
-    # group similar meshes
-    group_similar_items(selected_meshes, detect_options)
-    # group equal meshes
-    if do_group_equal:
-        group_equal_meshes(selected_meshes, detect_options)
-
-    # restore initial selection
-    scene.deselect()
-    for item in selected_meshes:
-        item.select()
-
-    print('done.')
-    h3dd.print_fn_out()
-
-
-save_log = h3du.get_user_value(h3dc.USER_VAL_NAME_SAVE_LOG)
-log_name = h3du.replace_file_ext(modo.Scene().name)
-h3dd = H3dDebug(enable=save_log, file=log_name)
 
 if __name__ == '__main__':
     main()
