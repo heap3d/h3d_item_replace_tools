@@ -196,7 +196,11 @@ def is_valid_ratio(val1, val2, threshold):
     if threshold < 0:
         print("threshold <{}>".format(threshold))
         raise ValueError
-    result = max(val1, val2) / min(val1, val2) < threshold + 1
+    try:
+        result = max(val1, val2) / min(val1, val2) < threshold + 1
+    except (TypeError, ZeroDivisionError):
+        print(f'{val1=}   {val2=}   {threshold=}')
+        return False
 
     return result
 
@@ -370,29 +374,33 @@ def is_similar_center_of_mass_pos(cur_mesh, cmp_mesh, threshold, options):
 
 
 def is_similar_mesh_volume(cur_mesh, cmp_mesh, threshold):
-    cur_size = h3du.get_mesh_bounding_box_size(cur_mesh)
-    cur_bb_vol = cur_size.x * cur_size.y * cur_size.z
-    cur_vol = get_volume(cur_mesh, com=False)
-    cur_vol_cube_root = cur_vol ** (1.0 / 3)  # type: ignore
-    cur_bb_vol_cube_root = cur_bb_vol ** (1.0 / 3)
-    cur_vol_root_ratio = cur_vol_cube_root / cur_bb_vol_cube_root
-    cur_info_str = h3du.get_mesh_debug_info(cur_mesh)
-    cur_info_str += "vol <{}> bb_vol <{}>\nroot ratio <{}>/<{}>=<{}>\n".format(
-        cur_vol, cur_bb_vol, cur_vol_cube_root, cur_bb_vol_cube_root, cur_vol_root_ratio  # type: ignore
-    )
-    h3du.set_mesh_debug_info(cur_mesh, cur_info_str)
+    try:
+        cur_size = h3du.get_mesh_bounding_box_size(cur_mesh)
+        cur_bb_vol = cur_size.x * cur_size.y * cur_size.z
+        cur_vol = get_volume(cur_mesh, com=False)
+        cur_vol_cube_root = cur_vol ** (1.0 / 3)  # type: ignore
+        cur_bb_vol_cube_root = cur_bb_vol ** (1.0 / 3)
+        cur_vol_root_ratio = cur_vol_cube_root / cur_bb_vol_cube_root
+        cur_info_str = h3du.get_mesh_debug_info(cur_mesh)
+        cur_info_str += "vol <{}> bb_vol <{}>\nroot ratio <{}>/<{}>=<{}>\n".format(
+            cur_vol, cur_bb_vol, cur_vol_cube_root, cur_bb_vol_cube_root, cur_vol_root_ratio  # type: ignore
+        )
+        h3du.set_mesh_debug_info(cur_mesh, cur_info_str)
 
-    cmp_size = h3du.get_mesh_bounding_box_size(cmp_mesh)
-    cmp_bb_vol = cmp_size.x * cmp_size.y * cmp_size.z
-    cmp_vol = get_volume(cmp_mesh, com=False)
-    cmp_vol_cube_root = cmp_vol ** (1.0 / 3)  # type: ignore
-    cmp_bb_vol_cube_root = cmp_bb_vol ** (1.0 / 3)
-    cmp_vol_root_ratio = cmp_vol_cube_root / cmp_bb_vol_cube_root
-    cmp_info_str = h3du.get_mesh_debug_info(cmp_mesh)
-    cmp_info_str += "vol <{}> bb_vol <{}>\nroots ratio <{}>/<{}>=<{}>\n".format(
-        cmp_vol, cmp_bb_vol, cmp_vol_cube_root, cmp_bb_vol_cube_root, cmp_vol_root_ratio  # type: ignore
-    )
-    h3du.set_mesh_debug_info(cmp_mesh, cmp_info_str)
+        cmp_size = h3du.get_mesh_bounding_box_size(cmp_mesh)
+        cmp_bb_vol = cmp_size.x * cmp_size.y * cmp_size.z
+        cmp_vol = get_volume(cmp_mesh, com=False)
+        cmp_vol_cube_root = cmp_vol ** (1.0 / 3)  # type: ignore
+        cmp_bb_vol_cube_root = cmp_bb_vol ** (1.0 / 3)
+        cmp_vol_root_ratio = cmp_vol_cube_root / cmp_bb_vol_cube_root
+        cmp_info_str = h3du.get_mesh_debug_info(cmp_mesh)
+        cmp_info_str += "vol <{}> bb_vol <{}>\nroots ratio <{}>/<{}>=<{}>\n".format(
+            cmp_vol, cmp_bb_vol, cmp_vol_cube_root, cmp_bb_vol_cube_root, cmp_vol_root_ratio  # type: ignore
+        )
+        h3du.set_mesh_debug_info(cmp_mesh, cmp_info_str)
+
+    except ZeroDivisionError:
+        return False
 
     if not is_valid_ratio(cur_vol_root_ratio, cmp_vol_root_ratio, threshold):
         return False

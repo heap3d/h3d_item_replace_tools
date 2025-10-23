@@ -12,7 +12,12 @@ import modo
 import modo.constants as c
 import lx
 
-from h3d_utilites.scripts.h3d_utils import get_select_type, duplicate_item, parent_items_to, get_parent_index
+from h3d_utilites.scripts.h3d_utils import (
+    get_select_type,
+    duplicate_item_and_hierarchy,
+    parent_items_to,
+    get_parent_index,
+)
 
 from scripts.center_utilites import (
     get_selected_components,
@@ -35,7 +40,7 @@ def main():
     for mesh in selected_meshes:
         if not mesh.geometry.numVertices:
             continue
-        
+
         original_parent = mesh.parent
         original_parent_index = get_parent_index(mesh)
         select_components(mesh, selected_components[mesh], select_type)
@@ -55,7 +60,7 @@ def main():
 
         modo.Scene().removeItems(original_loc)
 
-        new_mesh = duplicate_item(mesh)
+        new_mesh = duplicate_item_and_hierarchy(mesh)
         if not isinstance(new_mesh, modo.Mesh):
             raise TypeError('Failed to duplicate mesh.')
 
