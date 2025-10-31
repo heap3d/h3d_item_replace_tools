@@ -10,28 +10,24 @@
 
 import modo
 import modo.constants as c
-import lx
 
-from h3d_utilites.scripts.h3d_utils import (
-    get_select_type,
-    duplicate_item_and_hierarchy,
-    parent_items_to,
-    get_parent_index,
-)
+from h3d_utilites.scripts.h3d_utils import get_select_type
 
-from scripts.center_utilites import (
+from h3d_item_replace_tools.scripts.center_utilites import (
     get_selected_components,
-    select_components,
-    create_loc_at_selection,
-    update_instance,
-    place_center_at_locator,
+    numparents,
+    update_center,
+    select_if_exists,
 )
 
 
 def main():
     selected_meshes: list[modo.Mesh] = modo.Scene().selectedByType(itype=c.MESH_TYPE)
-    select_type = get_select_type()
+    selected_meshes.sort(key=numparents, reverse=True)
+    if not selected_meshes:
+        return
 
+    select_type = get_select_type()
     selected_components: dict[modo.Mesh, list] = dict()
     for mesh in selected_meshes:
         selected_components[mesh] = get_selected_components(mesh, select_type)
@@ -41,40 +37,14 @@ def main():
         if not mesh.geometry.numVertices:
             continue
 
-        original_parent = mesh.parent
-        original_parent_index = get_parent_index(mesh)
-        select_components(mesh, selected_components[mesh], select_type)
+        if not mesh.geometry.numVertices:
+            return mesh
 
-        original_loc = modo.Scene().addItem(itype=c.LOCATOR_TYPE)
-        parent_items_to((original_loc,), mesh, inplace=False)
-        parent_items_to((original_loc,), None, inplace=True)
-
-        mesh.select(replace=True)
-        lx.eval('transform.reset all')
-
-        new_center_loc = create_loc_at_selection(mesh, select_type, orient=False)
-
-        parent_items_to((new_center_loc,), mesh, inplace=True)
-        parent_items_to((mesh,), original_loc, inplace=False)
-        parent_items_to((mesh,), original_parent, index=original_parent_index, inplace=True)
-
-        modo.Scene().removeItems(original_loc)
-
-        new_mesh = duplicate_item_and_hierarchy(mesh)
-        if not isinstance(new_mesh, modo.Mesh):
-            raise TypeError('Failed to duplicate mesh.')
-
-        place_center_at_locator(new_mesh, new_center_loc)
-        modo.Scene().removeItems(new_center_loc)
-
-        update_instance(new_mesh, mesh)
+        new_mesh = update_center(mesh, select_type, selected_components[mesh], align_rot=False)
 
         new_meshes.append(new_mesh)
 
-    if new_meshes:
-        modo.Scene().deselect()
-        for mesh in new_meshes:
-            mesh.select()
+    select_if_exists(new_meshes)
 
 
 if __name__ == '__main__':

@@ -34,8 +34,10 @@
 		<source target="h3d_item_replace_tools/scripts/set_center_by_most_vertices_poly.py">scripts/set_center_by_most_vertices_poly.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_by_selected_polys.py">scripts/set_center_by_selected_polys.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_by_template.py">scripts/set_center_by_template.py</source>
+		<source target="h3d_item_replace_tools/scripts/set_center_pos_rot_to_item.py">scripts/set_center_pos_rot_to_item.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_pos_rot_to_selection.py">scripts/set_center_pos_rot_to_selection.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_center_pos_to_selection.py">scripts/set_center_pos_to_selection.py</source>
+		<source target="h3d_item_replace_tools/scripts/set_center_rot_to_selection.py">scripts/set_center_rot_to_selection.py</source>
 		<source target="h3d_item_replace_tools/scripts/set_source_item.py">scripts/set_source_item.py</source>
 		<source target="h3d_item_replace_tools/scripts/simple_unmerge_mesh.py">scripts/simple_unmerge_mesh.py</source>
 		<source target="h3d_item_replace_tools/scripts/smart_group_meshes.py">scripts/smart_group_meshes.py</source>

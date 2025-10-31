@@ -4,20 +4,22 @@
 # heap3d@gmail.com
 # --------------------------------
 # modo python
-# EMAG
-# set item center position and orientation by component selection
+# Leonard
+# move item center position by component selection
 # ================================
 
 import modo
 import modo.constants as c
 
-from h3d_utilites.scripts.h3d_utils import get_select_type
+from h3d_utilites.scripts.h3d_utils import (
+    get_select_type,
+)
 
 from h3d_item_replace_tools.scripts.center_utilites import (
     get_selected_components,
+    update_center,
     numparents,
     select_if_exists,
-    update_center,
 )
 
 
@@ -40,7 +42,7 @@ def main():
         if not mesh.geometry.numVertices:
             return mesh
 
-        new_mesh = update_center(mesh, select_type, selected_components[mesh])
+        new_mesh = update_center(mesh, select_type, selected_components[mesh], align_pos=False)
 
         new_meshes.append(new_mesh)
 
