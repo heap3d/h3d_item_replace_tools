@@ -29,12 +29,12 @@ from h3d_item_replace_tools.scripts.center_utilites import (
 
 def main():
     selected = modo.Scene().selectedByType(itype=c.LOCATOR_TYPE, superType=True)
-    selected.sort(key=numparents, reverse=True)
     if len(selected) < 2:
         return
 
     target_item = selected[-1]
     source_items = [item for item in selected[:-1] if item.type == itype_str(c.MESH_TYPE)]
+    source_items.sort(key=numparents, reverse=True)
 
     if not source_items:
         return
