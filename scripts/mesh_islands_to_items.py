@@ -199,10 +199,8 @@ def is_valid_ratio(val1, val2, threshold):
     try:
         result = max(val1, val2) / min(val1, val2) < threshold + 1
     except TypeError:
-        print(f'TypeError: {val1=}   {val2=}   {threshold=}')
         return False
     except ZeroDivisionError:
-        print(f'ZeroDivisionError: {val1=}   {val2=}   {threshold=}')
         return False
 
     return result
