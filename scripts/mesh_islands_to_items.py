@@ -198,8 +198,11 @@ def is_valid_ratio(val1, val2, threshold):
         raise ValueError
     try:
         result = max(val1, val2) / min(val1, val2) < threshold + 1
-    except (TypeError, ZeroDivisionError):
-        print(f'{val1=}   {val2=}   {threshold=}')
+    except TypeError:
+        print(f'TypeError: {val1=}   {val2=}   {threshold=}')
+        return False
+    except ZeroDivisionError:
+        print(f'ZeroDivisionError: {val1=}   {val2=}   {threshold=}')
         return False
 
     return result
@@ -282,9 +285,18 @@ def is_similar_bounding_box(cur_mesh, cmp_mesh, threshold, options):
     cur_size = h3du.get_mesh_bounding_box_size(cur_mesh)
     cmp_size = h3du.get_mesh_bounding_box_size(cmp_mesh)
 
-    rel_x = cmp_size.x / cur_size.x
-    rel_y = cmp_size.y / cur_size.y
-    rel_z = cmp_size.z / cur_size.z
+    try:
+        rel_x = cmp_size.x / cur_size.x
+    except ZeroDivisionError:
+        rel_x = 0.0
+    try:
+        rel_y = cmp_size.y / cur_size.y
+    except ZeroDivisionError:
+        rel_y = 0.0
+    try:
+        rel_z = cmp_size.z / cur_size.z
+    except ZeroDivisionError:
+        rel_z = 0.0
 
     if options.do_bounding_box.x:
         if not is_valid_ratio(rel_y, rel_x, threshold.x):
